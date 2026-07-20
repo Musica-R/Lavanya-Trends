@@ -1,0 +1,691 @@
+
+.product-section {
+  background: #f8f9fa;
+  padding: 0px 0px 50px;
+  overflow-x: hidden; /* safety net: nothing in this section can force page-wide horizontal scroll */
+}
+
+.product-container {
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 0 24px;
+  box-sizing: border-box;
+}
+
+/* ==========================================================
+   Hero Banner
+   ========================================================== */
+.saree-banner {
+  position: relative;
+  width: 100%;
+  height: 260px;
+  overflow: hidden;
+  background: #f4ece4;
+  margin-bottom: 32px;
+}
+
+.banner-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 25%;
+}
+
+.banner-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(248, 240, 231, 0.95) 0%,
+    rgba(248, 240, 231, 0.75) 45%,
+    rgba(248, 240, 231, 0.15) 75%,
+    rgba(248, 240, 231, 0) 100%
+  );
+}
+
+.banner-content {
+  position: relative;
+  z-index: 2;
+  max-width: 1300px;
+  margin: 0 auto;
+  height: 100%;
+  padding: 0 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.banner-breadcrumb {
+  font-size: 14px;
+  color: #555;
+  margin: 0 0 10px;
+  font-family: "Poppins", sans-serif;
+}
+
+.banner-breadcrumb .crumb-sep {
+  margin: 0 6px;
+  color: #999;
+}
+
+.banner-breadcrumb .crumb-current {
+  color: #8b1e3f;
+  font-weight: 600;
+}
+
+.banner-title {
+  font-family: "Playfair Display", serif;
+  font-style: italic;
+  font-size: 44px;
+  color: #3a1420;
+  margin: 0 0 8px;
+}
+
+.banner-subtitle {
+  font-family: "Poppins", sans-serif;
+  font-size: 16px;
+  color: #555;
+  max-width: 480px;
+  margin: 0;
+}
+
+/* ==========================================================
+   Shop Layout — Sidebar + Main
+   ========================================================== */
+.shop-layout {
+  display: grid;
+  /* minmax(0, 1fr) — NOT plain 1fr — is what stops the main column
+     from being stretched wider than the viewport by its contents
+     (the category-pill row in particular). Plain `1fr` lets a grid
+     track grow to fit its content's intrinsic width, which is what
+     was pushing the last product card and the Sort control off-screen. */
+  grid-template-columns: 270px minmax(0, 1fr);
+  gap: 32px;
+  align-items: start;
+  min-width: 0;
+}
+
+/* ---------- Sidebar ---------- */
+.filters-sidebar {
+  background: #fff;
+  border-radius: 10px;
+  padding: 20px;
+  border: 1px solid #ececec;
+  position: sticky;
+  top: 20px;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.filters-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.filters-header h4 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "Poppins", sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #222;
+  margin: 0;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.filter-icon {
+  color: #8b1e3f;
+}
+
+.clear-all-btn {
+  background: none;
+  border: none;
+  color: #a8324f;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.clear-all-btn:hover {
+  text-decoration: underline;
+}
+
+.filter-block {
+  padding: 16px 0;
+  border-top: 1px solid #f0f0f0;
+}
+
+.filter-block:first-of-type {
+  border-top: none;
+}
+
+.filter-block-title {
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #333;
+  margin: 0 0 14px;
+}
+
+/* Price slider */
+.price-slider {
+  position: relative;
+  height: 20px;
+  margin-bottom: 6px;
+}
+
+.price-slider input[type="range"] {
+  position: absolute;
+  width: 100%;
+  top: 6px;
+  left: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  pointer-events: none;
+  margin: 0;
+}
+
+.price-slider input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  pointer-events: auto;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #8b1e3f;
+  cursor: pointer;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px #8b1e3f;
+}
+
+.price-slider input[type="range"]::-moz-range-thumb {
+  pointer-events: auto;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #8b1e3f;
+  cursor: pointer;
+  border: 2px solid #fff;
+}
+
+.price-slider input[type="range"]::-webkit-slider-runnable-track {
+  height: 4px;
+  background: #e6c9d1;
+  border-radius: 2px;
+}
+
+.price-values {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #666;
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+.price-presets {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.preset-btn {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 8px 6px;
+  font-size: 12.5px;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.preset-btn:hover {
+  border-color: #8b1e3f;
+  color: #8b1e3f;
+}
+
+.preset-btn.active {
+  background: #8b1e3f;
+  border-color: #8b1e3f;
+  color: #fff;
+}
+
+/* Category checkboxes */
+.category-checkbox-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.category-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: #444;
+  cursor: pointer;
+}
+
+.category-checkbox input {
+  accent-color: #8b1e3f;
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}
+
+.view-more-btn {
+  margin-top: 12px;
+  background: none;
+  border: none;
+  color: #8b1e3f;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.fabric-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.fabric-toggle .filter-block-title {
+  margin: 0;
+}
+
+.fabric-plus {
+  font-size: 18px;
+  color: #8b1e3f;
+  font-weight: 700;
+}
+
+.fabric-toggle + .category-checkbox-list {
+  margin-top: 14px;
+}
+
+/* ---------- Main content ---------- */
+.shop-main {
+  min-width: 0; /* required so this column can shrink instead of overflowing */
+}
+
+.shop-main-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.shop-title {
+  font-family: "Playfair Display", serif;
+  font-style: italic;
+  font-size: 30px;
+  color: #333;
+  margin: 0 0 4px;
+}
+
+.shop-count {
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  color: #777;
+  margin: 0;
+}
+
+.shop-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.sort-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #444;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.sort-control select {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: #333;
+  background: #fff;
+  cursor: pointer;
+}
+
+/* Category pills row */
+.category-filter-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+  min-width: 0; /* lets the pill row below shrink+scroll instead of overflowing the page */
+}
+
+.pill-scroll-btn {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid #ddd;
+  background: #fff;
+  font-size: 18px;
+  color: #444;
+  cursor: pointer;
+}
+
+.category-filter {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  flex: 1;
+  min-width: 0; /* the actual fix: without this the flex item refuses to shrink
+                   below its content width, so overflow-x:auto never kicks in
+                   and the row (plus everything after it) pushes past the
+                   viewport edge instead of scrolling internally */
+}
+
+.category-filter::-webkit-scrollbar {
+  display: none;
+}
+
+.category-btn {
+  background: white;
+  border: 2px solid #e0e0e0;
+  padding: 10px 22px;
+  border-radius: 25px;
+  font-weight: 600;
+  font-size: 14px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #666;
+  flex-shrink: 0;
+}
+
+.category-btn:hover {
+  border-color: #8b1e3f;
+  color: #8b1e3f;
+  transform: translateY(-2px);
+}
+
+.category-btn.active {
+  background: linear-gradient(135deg, #a8324f 0%, #8b1e3f 100%);
+  color: white;
+  border-color: transparent;
+}
+
+/* ==========================================================
+   Product Grid (layout only — cards style themselves)
+   ========================================================== */
+.loader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 0px;
+}
+
+.product-grid {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.5s ease-in-out;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 28px;
+  animation: fadeIn 0.6s ease;
+  padding-bottom: 20px;
+}
+
+.product-grid.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.no-products {
+  text-align: center;
+  padding: 48px;
+  color: #666;
+  font-size: 20px;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+.pagination button {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 14px;
+  color: #444;
+  cursor: pointer;
+}
+
+.pagination button.active {
+  background: #8b1e3f;
+  border-color: #8b1e3f;
+  color: #fff;
+}
+
+.pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ==========================================================
+   Search bar (kept for pages that mount it elsewhere)
+   ========================================================== */
+.search-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 15px;
+  padding: 9.6px 29.2px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
+  width: 50%;
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+}
+
+.search-bar:focus-within {
+  background: rgba(255, 255, 255, 0.35);
+  transform: scale(1.02);
+}
+
+.search-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #222;
+  width: 100%;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.search-input::placeholder {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.search-button {
+  background: rgba(255, 255, 255, 0.4);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 0.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.search-button:hover {
+  background: rgba(255, 255, 255, 0.6);
+  transform: scale(1.15);
+}
+
+.search-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  padding: 10px 0px;
+}
+
+/* ==========================================================
+   Responsive
+   ========================================================== */
+@media (max-width: 1024px) {
+  .product-container {
+    padding: 0 16px;
+  }
+
+  .shop-layout {
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: 24px;
+  }
+
+  .product-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 22px;
+  }
+
+  .banner-title {
+    font-size: 36px;
+  }
+}
+
+@media (max-width: 900px) {
+  .shop-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .filters-sidebar {
+    position: static;
+  }
+}
+
+@media (max-width: 768px) {
+  .saree-banner {
+    height: 200px;
+  }
+
+  .banner-title {
+    font-size: 28px;
+  }
+
+  .banner-subtitle {
+    font-size: 14px;
+  }
+
+  .shop-title {
+    font-size: 24px;
+  }
+
+  .category-btn {
+    padding: 10px 18px;
+    font-size: 14px;
+  }
+
+  .product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  .no-products {
+    font-size: 18px;
+    padding: 36px;
+  }
+
+  .search-wrapper {
+    padding: 10px 0px;
+    gap: 10px;
+  }
+
+  .search-bar {
+    width: 100%;
+  }
+}
+
+@media (max-width: 420px) {
+  .banner-title {
+    font-size: 22px;
+  }
+
+  .banner-subtitle {
+    font-size: 13px;
+    max-width: 100%;
+  }
+
+  .shop-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .category-filter {
+    padding: 4px 0;
+  }
+
+  .category-btn {
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+
+  .product-container {
+    padding: 0px 10px;
+  }
+
+  .product-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .no-products {
+    font-size: 16px;
+    padding: 28px;
+  }
+}

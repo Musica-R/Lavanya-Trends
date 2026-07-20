@@ -1,0 +1,92 @@
+/* Full page wrapper - no overlay, no fixed positioning */
+.lav-login-page {
+  min-height: calc(100vh - 120px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background: #faf6f2;
+}
+
+/* Card */
+.lav-login-card {
+  background: #fff;
+  width: 100%;
+  max-width: 400px;
+  padding: 30px 25px;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+}
+
+.lav-login-color {
+  color: #8b1e3f;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.lav-login-card h3 {
+  font-size: 24px;
+  font-family: "Playfair Display", serif;
+  font-style: italic;
+  letter-spacing: 1px;
+  color: #8b1e3f;
+  margin-bottom: 20px;
+}
+
+.lav-login-img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+/* Inputs */
+.lav-login-form input {
+  width: 100%;
+  padding: 12px 14px;
+  margin-bottom: 15px;
+  border-radius: 10px;
+  border: 1.5px solid #ddd;
+  font-size: 15px;
+  transition: all 0.2s ease;
+}
+
+.lav-login-form input:focus {
+  border-color: #8b1e3f;
+  box-shadow: 0 0 8px rgba(139, 30, 63, 0.2);
+  outline: none;
+}
+
+/* Buttons */
+.lav-login-form button {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background: #8b1e3f;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.lav-login-form button:hover {
+  background: #a12c55;
+}
+
+/* Toggle text */
+.lav-login-toggle-text {
+  margin-top: 12px;
+  font-size: 14px;
+  color: #555;
+}
+
+/* Responsive */
+@media (max-width: 500px) {
+  .lav-login-card {
+    width: 90%;
+    padding: 20px;
+  }
+}

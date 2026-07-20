@@ -1,25 +1,34 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import { Routes, Route } from "react-router-dom";
+import Header from "./components/Header";
+import Footer from "./components/Footer";
+import { CartProvider } from "./context/CartContext";
+import { SearchProvider } from "./context/SearchContext";
 
-function App() {
+import HomePage from "./pages/HomePage";
+import ProductPage from "./pages/ProductPage";
+import ContactPage from "./pages/ContactPage";
+import AddToCartPage from "./pages/AddToCartPage";
+import JewelryPage from "./pages/JewelryPage";
+import ProfilePage from "./components/Profilepage";
+import LoginPage from "./components/Loginpage";
+
+export default function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <CartProvider>
+      <SearchProvider>
+        <Header />
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/product" element={<ProductPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/jew" element={<JewelryPage />} />
+          <Route path="/addtocart" element={<AddToCartPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/login" element={<LoginPage />} />
+        </Routes>
+        <Footer />
+      </SearchProvider>
+    </CartProvider>
   );
 }
-
-export default App;

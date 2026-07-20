@@ -1,0 +1,147 @@
+/* Reuse all base product section / grid / search styling */
+@import './ProductGrid.css';
+
+/* ===========================
+   JEWELRY LAYOUT (sidebar + grid)
+=========================== */
+
+.jewelry-container {
+  padding: 0 16px;
+}
+
+.jewelry-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 32px;
+  align-items: start;
+  padding-top: 10px;
+}
+
+/* Side Category List */
+.jewelry-sidebar {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  position: sticky;
+  top: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+}
+
+.jewelry-sidebar-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 16px 0;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.jewelry-category-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.jewelry-category-btn {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: 2px solid transparent;
+  padding: 10px 14px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.jewelry-category-btn:hover {
+  background: #f8f0f2;
+  color: #8b1e3f;
+}
+
+.jewelry-category-btn.active {
+  background: linear-gradient(135deg, #a8324f 0%, #8b1e3f 100%);
+  color: white;
+  border-color: transparent;
+}
+
+.jewelry-grid-wrap {
+  min-width: 0;
+}
+
+.jewelry-grid-wrap .product-grid {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* ===========================
+   LAPTOP (max-width: 1024px)
+=========================== */
+@media (max-width: 1024px) {
+  .jewelry-layout {
+    grid-template-columns: 190px 1fr;
+    gap: 20px;
+  }
+
+  .jewelry-grid-wrap .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ===========================
+   TABLET (max-width: 768px)
+=========================== */
+@media (max-width: 768px) {
+  .jewelry-layout {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .jewelry-sidebar {
+    position: static;
+    padding: 14px;
+  }
+
+  .jewelry-category-list {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .jewelry-category-btn {
+    width: auto;
+    text-align: center;
+  }
+
+  .jewelry-grid-wrap .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ===========================
+   MOBILE (max-width: 420px)
+=========================== */
+@media (max-width: 420px) {
+  .jewelry-container {
+    padding: 0 8px;
+  }
+
+  .jewelry-sidebar-title {
+    font-size: 14px;
+  }
+
+  .jewelry-category-btn {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+
+  .jewelry-grid-wrap .product-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
+  }
+}
