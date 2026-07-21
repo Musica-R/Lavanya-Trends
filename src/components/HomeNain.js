@@ -125,7 +125,7 @@ export default function MainHero() {
 
                     <div className="main-hero-actions">
                       <Link to="/product" className="btn-primary">Shop Now</Link>
-                      <a href="#categories" className="btn-secondary">Explore Jewelry</a>
+                      <a href="/jew" className="btn-secondary">Explore Jewelry</a>
                     </div>
 
                     <div className="hero-trust">

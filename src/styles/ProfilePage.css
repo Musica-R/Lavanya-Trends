@@ -1,37 +1,47 @@
 .lav-profile-page {
   display: flex;
   min-height: calc(100vh - 120px);
-  max-width: 1100px;
+  max-width: 1200px;
   margin: 30px auto;
   gap: 30px;
   padding: 0 20px;
   font-family: "Poppins", sans-serif;
 }
 
-/* Sidebar */
+/* ================= Sidebar ================= */
 .lav-profile-sidebar {
   width: 260px;
   flex-shrink: 0;
   background: #fff;
   border-radius: 16px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-  padding: 30px 20px;
+  padding: 0 20px 20px;
   text-align: center;
   height: fit-content;
+  overflow: hidden;
+}
+
+.lav-profile-avatar-wrap {
+  background: linear-gradient(180deg, #8b1e3f 0%, #6e1730 100%);
+  margin: 0 -20px 14px;
+  padding: 30px 20px 40px;
+  border-radius: 0 0 50% 50% / 0 0 30px 30px;
 }
 
 .lav-profile-avatar {
-  width: 70px;
-  height: 70px;
+  width: 74px;
+  height: 74px;
   border-radius: 50%;
-  background: #8b1e3f;
+  background: #6e1730;
   color: #fff;
-  font-size: 28px;
+  font-size: 30px;
   font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 14px;
+  margin: 0 auto;
+  border: 3px solid #ffffff;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.6);
 }
 
 .lav-profile-name {
@@ -66,9 +76,24 @@
   text-align: left;
   cursor: pointer;
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.lav-profile-nav-item:hover {
+.lav-profile-nav-item:disabled {
+  cursor: default;
+  color: #666;
+}
+
+.lav-profile-nav-icon {
+  width: 18px;
+  display: inline-flex;
+  justify-content: center;
+  font-size: 15px;
+}
+
+.lav-profile-nav-item:not(:disabled):hover {
   background: #f7e9ee;
 }
 
@@ -84,41 +109,164 @@
   padding-top: 16px;
 }
 
-/* Content */
+/* ================= Content ================= */
 .lav-profile-content {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ---- Hero banner (gold swapped for white) ---- */
+.lav-profile-hero {
+  position: relative;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  padding: 34px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  overflow: hidden;
+  min-height: 140px;
+}
+
+.lav-profile-hero-text h1 {
+  font-family: "Playfair Display", serif;
+  font-style: italic;
+  color: #8b1e3f;
+  font-size: 34px;
+  margin: 0 0 10px;
+}
+
+.lav-profile-hero-divider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.lav-profile-hero-divider span {
+  width: 34px;
+  height: 1px;
+  background: #d8b7a1;
+}
+
+.lav-profile-hero-divider i {
+  color: #b98a63;
+  font-style: normal;
+  font-size: 12px;
+}
+
+.lav-profile-hero-text p {
+  color: #666;
+  font-size: 14px;
+  margin: 0;
+}
+
+.lav-profile-hero-image {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 340px;
+  height: 100%;
+  background-image:
+    linear-gradient(90deg, #ffffff 0%, rgba(255, 255, 255, 0) 40%),
+    url("https://images.unsplash.com/photo-1614881064213-180b1c28f743?auto=format&fit=crop&w=900&q=80");
+  background-size: cover;
+  background-position: center right;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 35%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 35%);
+}
+
+/* ---- Main grid: profile card + overview panel ---- */
+.lav-profile-main-grid {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
 }
 
 .lav-profile-card {
+  flex: 1;
   background: #fff;
   border-radius: 16px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
   padding: 30px;
 }
 
+.lav-profile-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
 .lav-profile-card h2 {
   font-family: "Playfair Display", serif;
   font-style: italic;
   color: #8b1e3f;
-  margin-bottom: 20px;
+  margin: 0;
+  font-size: 20px;
+}
+
+.lav-profile-edit-btn {
+  background: transparent;
+  border: 1px solid #8b1e3f;
+  color: #8b1e3f;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.lav-profile-edit-btn:hover {
+  background: #8b1e3f;
+  color: #fff;
 }
 
 .lav-profile-field {
   display: flex;
-  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
   padding: 14px 0;
   border-bottom: 1px solid #f0f0f0;
 }
 
+.lav-profile-field:last-child {
+  border-bottom: none;
+}
+
+.lav-profile-field > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.lav-profile-field-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: #f7e9ee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+  color: #8b1e3f;
+  font-size: 20px;
+}
+
 .lav-profile-label {
   color: #888;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .lav-profile-value {
-  color: #222;
-  font-weight: 600;
-  font-size: 15px;
+  color: #652337;
+  font-weight: 400;
+  font-size: 14px;
 }
 
 .lav-profile-status {
@@ -168,12 +316,182 @@
   font-size: 14px;
 }
 
-/* Responsive */
+/* ---- Account overview panel ---- */
+.lav-profile-overview {
+  width: 280px;
+  flex-shrink: 0;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  padding: 13px;
+}
+
+.lav-profile-overview h2 {
+  font-family: "Playfair Display", serif;
+  font-style: italic;
+  color: #8b1e3f;
+  font-size: 18px;
+  margin: 0 0 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lav-profile-overview-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #faf7f6;
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 12px;
+}
+
+.lav-profile-overview-item > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.lav-profile-overview-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+  background: #f0e2e6;
+}
+
+.lav-icon-pink {
+  background: #fbe3ea;
+}
+
+.lav-icon-peach {
+  background: #fbead7;
+}
+
+.lav-icon-mint {
+  background: #dff2ea;
+}
+
+/* ---- Thank you / trust banner ---- */
+.lav-profile-thankyou {
+  background: #fbeff0;
+  border-radius: 16px;
+  padding: 26px 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.lav-profile-thankyou-main {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex: 1;
+  min-width: 260px;
+}
+
+.lav-profile-crown {
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  background: #8b1e3f;
+  color: #f1c27d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  flex-shrink: 0;
+}
+
+.lav-profile-thankyou-main p {
+  margin: 0;
+  color: #333;
+  font-size: 14px;
+}
+
+.lav-profile-thankyou-main h3 {
+  font-family: "Playfair Display", serif;
+  font-style: italic;
+  color: #8b1e3f;
+  margin: 2px 0 6px;
+  font-size: 20px;
+}
+
+.lav-profile-thankyou-sub {
+  color: #777 !important;
+  font-size: 13px !important;
+}
+
+.lav-profile-perks {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+.lav-profile-perk {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 4px;
+  min-width: 120px;
+}
+
+.lav-profile-perk span {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  margin-bottom: 6px;
+}
+
+.lav-profile-perk strong {
+  color: #8b1e3f;
+  font-size: 14px;
+}
+
+.lav-profile-perk small {
+  color: #888;
+  font-size: 12px;
+}
+
+/* ================= Responsive ================= */
+@media (max-width: 900px) {
+  .lav-profile-main-grid {
+    flex-direction: column;
+  }
+  .lav-profile-overview {
+    width: 100%;
+  }
+  .lav-profile-hero-image {
+    width: 220px;
+  }
+}
+
 @media (max-width: 700px) {
   .lav-profile-page {
     flex-direction: column;
   }
   .lav-profile-sidebar {
     width: 100%;
+  }
+  .lav-profile-hero {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 24px;
+  }
+  .lav-profile-hero-image {
+    display: none;
   }
 }

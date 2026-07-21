@@ -1,22 +1,327 @@
-/* Full page wrapper - no overlay, no fixed positioning */
-.lav-login-page {
-  min-height: calc(100vh - 120px);
+/* ============================================================
+   Lavanya Trends – Auth Page
+   White/ivory replaces the gold accents from the reference layout
+   ============================================================ */
+
+.lav-auth-page {
+  min-height: 100vh;
+  display: flex;
+  background: #faf6f2;
+}
+
+/* ---------------- LEFT BRAND PANEL ---------------- */
+.lav-auth-left {
+  position: relative;
+  flex: 1 1 60%;
+  min-height: 100vh;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  margin-top: 20px;
+}
+
+.lotus{
+  font-size: 30px;
+  color: white;
+  font-weight: 600;
+}
+.lav-auth-left-overlay {
+  position: absolute;
+  inset: 0;
+}
+
+.lav-auth-left-content {
+  position: relative;
+  z-index: 1;
+  padding: 60px 64px;
+  color: #fff;
+  max-width: 560px;
+}
+
+.lav-auth-brandmark {
+  color: #fff;
+  margin-bottom: 20px;
+}
+
+.lav-auth-heading {
+  font-family: "Playfair Display", serif;
+  font-size: 46px;
+  line-height: 1.15;
+  font-weight: 500;
+  color: #fdfdfd;
+  margin: 0 0 18px;
+}
+
+.lav-auth-divider {
+  display: block;
+  width: 70px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.7);
+  margin-bottom: 20px;
+}
+
+.lav-auth-subtext {
+  font-size: 16px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 40px;
+}
+
+.lav-features-row {
+  display: flex;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+
+.lav-feature-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.9);
+  width: 84px;
+}
+
+.lav-feature-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+.lav-feature-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* ---------------- RIGHT FORM PANEL ---------------- */
+.lav-auth-right {
+  flex: 1 1 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 40px 20px;
-  background: #faf6f2;
 }
 
-/* Card */
 .lav-login-card {
   background: #fff;
   width: 100%;
-  max-width: 400px;
-  padding: 30px 25px;
-  border-radius: 16px;
+  max-width: 440px;
+  padding: 44px 40px 36px;
+  border-radius: 20px;
   text-align: center;
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+}
+
+.lav-card-logo-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.lav-card-logo-line {
+  flex: 1;
+  max-width: 60px;
+  height: 1px;
+  background: #e3d9d0;
+}
+
+.lav-card-logo-circle {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #8b1e3f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 1px #eee2da;
+}
+
+.lav-card-title {
+  font-size: 26px;
+  font-family: "Playfair Display", serif;
+  font-weight: 600;
+  color: #8b1e3f;
+  margin: 0 0 6px;
+}
+
+.lav-card-subtitle {
+  font-size: 14px;
+  color: #7a7a7a;
+  margin: 0 0 28px;
+}
+
+/* ---------------- Inputs ---------------- */
+.lav-login-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.lav-input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+  border-radius: 12px;
+  border: 1.5px solid #e4e0dc;
+  background: #fff;
+  transition: all 0.2s ease;
+}
+
+.lav-input-group:focus-within {
+  border-color: #8b1e3f;
+  box-shadow: 0 0 0 3px rgba(139, 30, 63, 0.12);
+}
+
+.lav-input-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  color: #9a9a9a;
+  flex-shrink: 0;
+}
+
+.lav-input-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.lav-input-group input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 13px 12px 13px 0;
+  font-size: 15px;
+  color: #333;
+}
+
+.lav-input-eye {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #9a9a9a;
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+}
+
+.lav-input-eye svg {
+  width: 18px;
+  height: 18px;
+}
+
+.lav-forgot-row {
+  display: flex;
+  justify-content: flex-end;
+  margin: -6px 0 18px;
+}
+
+.lav-forgot-link {
+  font-size: 13px;
+  color: #8b1e3f;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ---------------- Buttons ---------------- */
+.lav-submit-btn {
+  width: 100%;
+  padding: 13px;
+  border-radius: 12px;
+  border: none;
+  background: #8b1e3f;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.lav-submit-btn svg {
+  width: 16px;
+  height: 16px;
+  stroke: #fff;
+}
+
+.lav-submit-btn:hover {
+  background: #a12c55;
+}
+
+/* ---------------- Divider ---------------- */
+.lav-or-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: #9a9a9a;
+  font-size: 13px;
+  margin: 26px 0 18px;
+}
+
+.lav-or-divider::before,
+.lav-or-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #eee2da;
+}
+
+.lav-or-divider span {
+  padding: 0 14px;
+}
+
+/* ---------------- Social buttons ---------------- */
+.lav-social-row {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.lav-social-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px;
+  border-radius: 12px;
+  border: 1.5px solid #e4e0dc;
+  background: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.lav-social-btn:hover {
+  border-color: #d6cfc8;
+  background: #fafafa;
+}
+
+/* ---------------- Toggle text ---------------- */
+.lav-login-toggle-text {
+  margin-top: 4px;
+  font-size: 14px;
+  color: #555;
 }
 
 .lav-login-color {
@@ -25,68 +330,23 @@
   cursor: pointer;
 }
 
-.lav-login-card h3 {
-  font-size: 24px;
-  font-family: "Playfair Display", serif;
-  font-style: italic;
-  letter-spacing: 1px;
-  color: #8b1e3f;
-  margin-bottom: 20px;
+/* ---------------- Responsive ---------------- */
+@media (max-width: 900px) {
+  .lav-auth-left {
+    display: none;
+  }
+  .lav-auth-right {
+    flex: 1 1 100%;
+  }
 }
 
-.lav-login-img {
-  width: 100%;
-  height: auto;
-  object-fit: cover;
-  border-radius: 10px;
-}
-
-/* Inputs */
-.lav-login-form input {
-  width: 100%;
-  padding: 12px 14px;
-  margin-bottom: 15px;
-  border-radius: 10px;
-  border: 1.5px solid #ddd;
-  font-size: 15px;
-  transition: all 0.2s ease;
-}
-
-.lav-login-form input:focus {
-  border-color: #8b1e3f;
-  box-shadow: 0 0 8px rgba(139, 30, 63, 0.2);
-  outline: none;
-}
-
-/* Buttons */
-.lav-login-form button {
-  width: 100%;
-  padding: 12px;
-  border-radius: 10px;
-  border: none;
-  background: #8b1e3f;
-  color: #fff;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.lav-login-form button:hover {
-  background: #a12c55;
-}
-
-/* Toggle text */
-.lav-login-toggle-text {
-  margin-top: 12px;
-  font-size: 14px;
-  color: #555;
-}
-
-/* Responsive */
 @media (max-width: 500px) {
   .lav-login-card {
-    width: 90%;
-    padding: 20px;
+    width: 100%;
+    padding: 32px 22px;
+  }
+  .lav-card-logo-circle {
+    width: 48px;
+    height: 48px;
   }
 }

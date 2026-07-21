@@ -95,7 +95,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 2rem;
-  padding: 5px 0px;
+  /* padding: 5px 0px; */
 }
 
 /* Logo */
@@ -229,6 +229,7 @@
   justify-content: center;
   cursor: pointer;
   transition: all 0.25s ease;
+  border: none;
 }
 
 .profile svg {
