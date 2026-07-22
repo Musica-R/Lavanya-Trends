@@ -2,10 +2,8 @@
 
 .header {
   font-family: "Playfair Display", serif;
-  font-style: italic;
   letter-spacing: 1px;
   color: #8b1e3f;
-
   position: fixed;
   top: 0;
   left: 0;
@@ -56,6 +54,7 @@
   background: none;
   border: none;
   font-size: 2rem;
+  color: #8b1e3f;
   cursor: pointer;
 }
 
@@ -73,13 +72,16 @@
   font-style: italic;
   letter-spacing: 1px;
   color: #8b1e3f;
-  /* rich maroon */
   font-size: 1.1rem;
   font-weight: 500;
 }
 
 .mobile-menu a:hover {
   opacity: 0.7;
+}
+
+.mobile-menu a.active {
+  color: #000;
 }
 
 .mobile-lang {
@@ -89,13 +91,13 @@
 }
 
 .header-container {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 2rem;
-  /* padding: 5px 0px; */
+  padding: 10px 24px;
 }
 
 /* Logo */
@@ -115,91 +117,116 @@
   font-size: 2rem;
 }
 
+.logo-link {
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+  margin-left: 8px;
+}
+
 .logo-text {
   font-family: "Playfair Display", serif;
-  font-size: 22px;
+  font-size: 26px;
   font-weight: 600;
   font-style: italic;
   letter-spacing: 1px;
   color: #8b1e3f;
-  /* rich maroon */
-  margin-left: 8px;
+}
+
+/* Sarees Collection tagline — muted gold/bronze, distinct from maroon brand color */
+.logo-subtext {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #a67c3d;
+  text-align: center;
 }
 
 /* Navigation */
 .nav {
   display: flex;
   gap: 2rem;
+  align-items: center;
 }
 
 .nav-link {
-  /* color: white; */
   color: #8b1e3f;
   text-decoration: none;
   font-weight: 600;
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+  /* text-transform: uppercase; */
   transition: all 0.3s ease;
   position: relative;
-  font-family: 'Times New Roman', Times, serif;
+  padding-bottom: 6px;
 }
 
 .nav-link::after {
   content: '';
   position: absolute;
-  bottom: -5px;
+  bottom: -2px;
   left: 0;
   width: 0;
   height: 2px;
-  background: white;
+  background: #202020;
   transition: width 0.3s ease;
 }
 
+/* Selected/active nav link -> black text */
+.nav-link.active {
+  color: #323232;
+  font-weight: 700;
+}
+
+.nav-link.active::after,
 .nav-link:hover::after {
   width: 100%;
 }
 
 .nav-link:hover {
-  opacity: 0.8;
+  color: #000;
+  opacity: 0.85;
 }
 
 /* Cart Button */
 .cart-button {
   position: relative;
-  /* background: rgba(255, 255, 255, 0.2); */
+  background: none;
   border: none;
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
+  width: 46px;
+  height: 46px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
+  color: #8b1e3f;
 }
 
 .cart-button:hover {
-  background: rgba(255, 255, 255, 0.3);
   transform: scale(1.1);
+  opacity: 0.8;
 }
 
 .cart-icon {
-  font-size: 1.5rem;
+  color: #8b1e3f;
 }
 
 .cart-badge {
   position: absolute;
-  top: -5px;
-  right: -5px;
-  background: #6fabff;
-  /* color: white; */
-  color: black;
+  top: 2px;
+  right: 2px;
+  background: #d81e2c;
+  color: #fff;
   border-radius: 50%;
-  width: 24px;
-  height: 24px;
+  width: 18px;
+  height: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 700;
   animation: pulse 0.5s ease;
 }
@@ -218,30 +245,61 @@
   }
 }
 
+/* Profile (logged in) */
 .profile {
-  width: 50px;
-  height: 50px;
+  position: relative;
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
   background: #f5f6f7;
-  /* light grey */
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.25s ease;
   border: none;
+  color: #8b1e3f;
+  overflow: hidden;
 }
 
-.profile svg {
-  font-size: 1.9rem;
+.profile:hover {
+  background: #efeff0;
+  transform: scale(1.08);
+}
+
+.profile-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.profile-initial {
+  font-family: "Playfair Display", serif;
+  font-weight: 700;
+  font-size: 1.1rem;
   color: #8b1e3f;
 }
 
+/* Sign In / Login text link (logged out) */
+.auth-link {
+  background: none;
+  border: 1px solid #8b1e3f;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: #8b1e3f;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.25s ease;
+}
 
-.profile:hover {
-  background: #ffffff;
-  /* slightly darker grey */
-  transform: scale(1.08);
+.auth-link:hover {
+  background: #8b1e3f;
+  color: #fff;
 }
 
 .lang-select {
@@ -253,18 +311,13 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 50px;
-}
-
-/* IMPORTANT: anchor point */
-.profile {
-  position: relative;
+  gap: 20px;
 }
 
 /* Dropdown */
 .profile-dropdown {
   position: absolute;
-  top: 110%;     
+  top: 110%;
   right: 0;
   background: #fff;
   border: 1px solid #e5e5e5;
@@ -276,12 +329,11 @@
   flex-direction: column;
 }
 
-.logout{
+.logout {
   color: red;
   font-weight: bold;
 }
 
-/* Text rows */
 .profile-dropdown p {
   margin: 0;
   padding: 8px 14px;
@@ -289,12 +341,10 @@
   color: #333;
 }
 
-/* Divider effect */
 .profile-dropdown p:first-child {
   font-weight: 600;
 }
 
-/* Button like select option */
 .profile-dropdown button {
   background: none;
   border: none;
@@ -306,12 +356,10 @@
   width: 100%;
 }
 
-/* Hover like select dropdown */
 .profile-dropdown button:hover {
   background: #f5f5f5;
   color: #000;
 }
-
 
 /* ===========================
    LAPTOP (max-width: 1024px)
@@ -327,17 +375,13 @@
     gap: 1.5rem;
   }
 
-  .logo {
-    font-size: 1.4rem;
+  .logo-text {
+    font-size: 22px;
   }
 
-  .logo-icon {
-    font-size: 1.8rem;
-  }
-
-  .search-bar {
-    max-width: 420px;
-    padding: 8px 22px;
+  .auth-link {
+    padding: 7px 12px;
+    font-size: 0.8rem;
   }
 }
 
@@ -355,44 +399,24 @@
     gap: 1rem;
   }
 
-  /* Hide nav links (hamburger friendly) */
   .nav {
     display: none;
   }
 
-  .logo {
-    font-size: 1.3rem;
-  }
-
-  .logo-icon {
-    font-size: 1.7rem;
-  }
-
-  .search-bar {
-    order: 3;
-    flex: 1 1 100%;
-    max-width: 100%;
-    padding: 8px 20px;
+  .logo-text {
+    font-size: 20px;
   }
 
   .cart-button,
   .profile {
-    width: 44px;
-    height: 44px;
-  }
-
-  .cart-icon {
-    font-size: 1.4rem;
+    width: 40px;
+    height: 40px;
   }
 
   .cart-badge {
-    width: 22px;
-    height: 22px;
-    font-size: 0.7rem;
-  }
-
-  .nav {
-    display: none;
+    width: 17px;
+    height: 17px;
+    font-size: 0.65rem;
   }
 
   .hamburger {
@@ -404,10 +428,6 @@
   }
 
   .pro {
-    display: none;
-  }
-
-  .search-bar {
     display: none;
   }
 
@@ -436,7 +456,6 @@
     opacity: 1;
     transform: translateY(0);
   }
-
 }
 
 /* ===========================
@@ -453,56 +472,31 @@
     gap: 0.75rem;
   }
 
-  .logo {
-    font-size: 1.2rem;
-  }
-
-  .logo-icon {
-    font-size: 1.5rem;
-  }
-
   .pro {
     display: none;
   }
 
   .logo-text {
-    font-size: 15px;
-    margin-left: 0px;
+    font-size: 16px;
   }
 
-  .search-bar {
-    padding: 7px 16px;
-    border-radius: 12px;
-  }
-
-  .search-input {
-    font-size: 0.9rem;
-  }
-
-  .search-button {
-    font-size: 1rem;
+  .logo-subtext {
+    font-size: 9px;
+    letter-spacing: 2px;
   }
 
   .cart-button,
   .profile {
-    width: 40px;
-    height: 40px;
-  }
-
-  .cart-icon {
-    font-size: 1.3rem;
+    width: 36px;
+    height: 36px;
   }
 
   .cart-badge {
-    width: 20px;
-    height: 20px;
-    font-size: 0.65rem;
-    top: -4px;
-    right: -4px;
-  }
-
-  .search-bar {
-    display: none;
+    width: 15px;
+    height: 15px;
+    font-size: 0.6rem;
+    top: 0;
+    right: 0;
   }
 
   .sale-bar-text {

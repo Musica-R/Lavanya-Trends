@@ -239,7 +239,7 @@
    SHOP BY CATEGORY — circular thumbnails row
 ========================================================= */
 .category-section {
-  padding: 64px 24px 72px;
+  padding: 64px 24px 0px;
   background: #fffaf4;
   text-align: center;
 }

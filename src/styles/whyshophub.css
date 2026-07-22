@@ -1,40 +1,76 @@
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,600&family=Poppins:wght@400;500;600&display=swap");
+
 /* ===============================
    WHY SHOPHUB SECTION
+   (continues the homepage theme: cream bg, maroon accent,
+   italic Playfair Display headings, eyebrow + ornament divider)
 ================================ */
 
 .why-shophub {
-  background: #f9f9ff;
+  background: #fdfaf6;
   padding: 70px 20px;
+  font-family: "Poppins", sans-serif;
 }
 
 .why-container {
+  max-width: 1400px;
+  margin: 0 auto;
   text-align: center;
 }
 
 .why-con {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  align-items: center;
+}
+
+.why-eyebrow {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #8b1e3f;
+  margin-bottom: 6px;
 }
 
 .why-title {
-  font-size: 32px;
+  font-size: 34px;
   font-weight: 600;
   font-family: "Playfair Display", serif;
   font-style: italic;
   letter-spacing: 1px;
+  color: #2b1210;
+  margin: 0;
+}
+
+.why-ornament {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.why-ornament-line {
+  width: 46px;
+  height: 1px;
+  background: #d8c9c2;
+}
+
+.why-ornament-dot {
   color: #8b1e3f;
+  font-size: 12px;
 }
 
 .why-subtitle {
   font-size: 16px;
-  color: #666;
-  margin-bottom: 50px;
+  color: #7a6f6c;
+  margin: 18px 0 50px;
 }
 
 .why-grid {
   display: grid;
-  grid-template-columns: 20% 20% 20% 20%;
+  grid-template-columns: repeat(4, 1fr);
   justify-content: center;
   gap: 30px;
 }
@@ -42,19 +78,39 @@
 .why-card {
   background: #fff;
   border-radius: 16px;
-  padding: 35px 25px;
+  padding: 40px 26px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid #f1e6e0;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
 .why-card:hover {
   transform: translateY(-6px);
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.1);
+  border-color: #8b1e3f;
 }
 
 .why-icon {
-  font-size: 42px;
-  margin-bottom: 20px;
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 22px;
+  border-radius: 50%;
+  border: 1.5px solid #8b1e3f;
+  color: #8b1e3f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+.why-icon svg {
+  width: 26px;
+  height: 26px;
+}
+
+.why-card:hover .why-icon {
+  background: #8b1e3f;
+  color: #fff;
 }
 
 .why-card h3 {
@@ -71,18 +127,18 @@
   font-size: 14px;
   color: #777;
   line-height: 1.6;
+  margin: 0;
 }
 
 /* =========================
    DESKTOP (DEFAULT ≥1024px)
 ========================= */
-/* Your existing styles work well here */
+/* Existing styles above cover this breakpoint */
 
 /* =========================
    TABLET - ≤1024px
 ========================= */
 @media (max-width: 1024px) {
-
   .why-shophub {
     padding: 60px 20px;
   }
@@ -106,7 +162,13 @@
   }
 
   .why-icon {
-    font-size: 38px;
+    width: 54px;
+    height: 54px;
+  }
+
+  .why-icon svg {
+    width: 22px;
+    height: 22px;
   }
 }
 
@@ -114,7 +176,6 @@
    MOBILE - ≤768px
 ========================= */
 @media (max-width: 768px) {
-
   .why-shophub {
     padding: 50px 16px;
   }
@@ -139,8 +200,14 @@
   }
 
   .why-icon {
-    font-size: 34px;
+    width: 50px;
+    height: 50px;
     margin-bottom: 16px;
+  }
+
+  .why-icon svg {
+    width: 20px;
+    height: 20px;
   }
 
   .why-card h3 {
@@ -156,7 +223,6 @@
    SMALL MOBILE - ≤480px
 ========================= */
 @media (max-width: 480px) {
-
   .why-shophub {
     padding: 40px 14px;
   }
@@ -178,6 +244,11 @@
 
   .why-card:hover {
     transform: none;
-    /* disable hover lift on touch devices */
+    border-color: #f1e6e0;
+  }
+
+  .why-card:hover .why-icon {
+    background: transparent;
+    color: #8b1e3f;
   }
 }

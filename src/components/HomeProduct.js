@@ -2,30 +2,110 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "../styles/Mainpro.css";
 
-// Static images
-import saree1 from "../assets/sarees1.jpg.jpeg";
-import saree2 from "../assets/saree2.jpg.jpeg";
-import saree3 from "../assets/saree3.jpg.jpeg";
-import saree4 from "../assets/saree4.jpg.jpeg";
+/* =========================================================
+   IMAGE SOURCES
+   Bestsellers + Shop By Occasion use Unsplash stock photography
+   (swap these for your own product shoots whenever you're ready —
+   just replace the URL string, everything else keeps working).
+   ========================================================= */
+const IMG = {
+  saree1: "https://images.unsplash.com/photo-1618901185975-d59f7091bcfe?auto=format&fit=crop&w=800&q=80",
+  saree2: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=800&q=80",
+  saree3: "https://images.unsplash.com/photo-1679006831648-7c9ea12e5807?auto=format&fit=crop&w=800&q=80",
+  saree4: "https://images.unsplash.com/photo-1727430228383-aa1fb59db8bf?auto=format&fit=crop&w=800&q=80",
+  saree5: "https://images.unsplash.com/photo-1641699862936-be9f49b1c38d?auto=format&fit=crop&w=800&q=80",
+  saree6: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80",
+  saree7: "https://images.unsplash.com/photo-1609748340041-f5d61e061ebc?auto=format&fit=crop&w=800&q=80",
+  saree8: "https://images.unsplash.com/flagged/photo-1551854716-8b811be39e7e?auto=format&fit=crop&w=800&q=80",
+  saree9: "https://images.unsplash.com/photo-1610030469668-8e9f641aaf27?auto=format&fit=crop&w=800&q=80",
+  saree10: "https://images.unsplash.com/photo-1610189012906-4c0aa9b9781e?auto=format&fit=crop&w=800&q=80",
 
-import saree9 from "../assets/pg.jpg";
-import saree10 from "../assets/pgsar.jpg";
-import saree11 from "../assets/Sillk_Saree.webp";
-import saree12 from "../assets/saree8.webp";
+  occ1: "https://images.unsplash.com/photo-1610030468706-9a6dbad49b0a?auto=format&fit=crop&w=800&q=80",
+  occ2: "https://images.unsplash.com/photo-1610030469839-f909584b43f1?auto=format&fit=crop&w=800&q=80",
+  occ3: "https://images.unsplash.com/photo-1610189025857-f42fe6e8dd91?auto=format&fit=crop&w=800&q=80",
+  occ4: "https://images.unsplash.com/photo-1615886753866-79396abc446e?auto=format&fit=crop&w=800&q=80",
+  occ5: "https://images.unsplash.com/photo-1688382654723-a7366006519b?auto=format&fit=crop&w=800&q=80",
+  occ6: "https://images.unsplash.com/photo-1631698532383-97ffe7c223c7?auto=format&fit=crop&w=800&q=80",
+  occ7: "https://images.unsplash.com/photo-1671642883395-0ab89c3ac890?auto=format&fit=crop&w=800&q=80",
+  occ8: "https://images.unsplash.com/photo-1601121141461-9d6647bca1ed?auto=format&fit=crop&w=800&q=80",
+  occ9: "https://images.unsplash.com/photo-1638617501607-5dfb8b079ebf?auto=format&fit=crop&w=800&q=80",
+  occ10: "https://images.unsplash.com/photo-1600862754152-80a263dd564f?auto=format&fit=crop&w=800&q=80",
 
-// Static products
+  bannerSaree: "/ass/banner.jpg",
+  bannerJewelry: "/ass/ban-jew.png",
+};
+
+/* Static "Our Bestsellers" — 10 items */
 const products = [
-  { id: 1, name: "Navy Blue Crepe Saree", price: "₹4,949", image: saree1, isNew: true },
-  { id: 2, name: "Hot Pink Georgette Saree", price: "₹22,109", image: saree2, isNew: true },
-  { id: 3, name: "Silver Banarasi Tissue Saree", price: "₹16,829", image: saree3 },
-  { id: 4, name: "Burgundy Bandhani Silk Saree", price: "₹10,119", image: saree4 },
+  { id: 1, name: "Navy Blue Crepe Saree", price: "₹4,949", image: IMG.saree1, isNew: true },
+  { id: 2, name: "Hot Pink Georgette Saree", price: "₹22,109", image: IMG.saree2, isNew: true },
+  { id: 3, name: "Silver Banarasi Tissue Saree", price: "₹16,829", image: IMG.saree3 },
+  { id: 4, name: "Burgundy Bandhani Silk Saree", price: "₹10,119", image: IMG.saree4 },
+  { id: 5, name: "Emerald Green Kanjivaram Saree", price: "₹18,499", image: IMG.saree5, isNew: true },
+  { id: 6, name: "Maroon Tussar Silk Saree", price: "₹8,299", image: IMG.saree6 },
+  { id: 7, name: "Ivory Organza Saree", price: "₹6,749", image: IMG.saree7 },
+  { id: 8, name: "Rose Gold Chiffon Saree", price: "₹9,199", image: IMG.saree8, isNew: true },
+  { id: 9, name: "Mustard Yellow Cotton Saree", price: "₹3,899", image: IMG.saree9 },
+  { id: 10, name: "Sapphire Blue Silk Saree", price: "₹14,599", image: IMG.saree10 },
 ];
 
+/* Static "Shop By Occasion" — 10 items */
 const productss = [
-  { id: 1, name: "Maternity Wear", image: saree9 },
-  { id: 2, name: "Wedding Collection", image: saree10 },
-  { id: 3, name: "Office Wear", image: saree11 },
-  { id: 4, name: "Party Wear Sarees", image: saree12 },
+  { id: 1, name: "Maternity Wear", image: IMG.occ1 },
+  { id: 2, name: "Wedding Collection", image: IMG.occ2 },
+  { id: 3, name: "Office Wear", image: IMG.occ3 },
+  { id: 4, name: "Party Wear Sarees", image: IMG.occ4 },
+  { id: 5, name: "Festive Edit", image: IMG.occ5 },
+  { id: 6, name: "Engagement Special", image: IMG.occ6 },
+  { id: 7, name: "Everyday Jewelry", image: IMG.occ7 },
+  { id: 8, name: "Reception Sarees", image: IMG.occ8 },
+  { id: 9, name: "Bridal Jewelry", image: IMG.occ9 },
+  { id: 10, name: "Statement Necklaces", image: IMG.occ10 },
+];
+
+/* Feature strip content */
+const features = [
+  {
+    title: "Premium Quality",
+    text: "A curated edit of silk sarees and handcrafted jewelry",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4L12 2z" strokeLinejoin="round" />
+      </svg>
+    ),
+  },
+  {
+    title: "Fast Shipping",
+    text: "Free delivery on orders above ₹4,000",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path d="M3 7h11v9H3z" strokeLinejoin="round" />
+        <path d="M14 10h4l3 3v3h-7z" strokeLinejoin="round" />
+        <circle cx="7" cy="18" r="1.6" />
+        <circle cx="17.5" cy="18" r="1.6" />
+      </svg>
+    ),
+  },
+  {
+    title: "Secure Payment",
+    text: "100% protected checkout — cards, UPI & wallets",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3z" strokeLinejoin="round" />
+      </svg>
+    ),
+  },
+  {
+    title: "Customer Care",
+    text: "Here for you Monday through Saturday",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path d="M4 12a8 8 0 0 1 16 0" />
+        <path d="M4 12v4a2 2 0 0 0 2 2h1v-6H4z" />
+        <path d="M20 12v4a2 2 0 0 1-2 2h-1v-6h3z" />
+      </svg>
+    ),
+  },
 ];
 
 const HomeProduct = () => {
@@ -35,17 +115,14 @@ const HomeProduct = () => {
   useEffect(() => {
     const fetchHotLoom = async () => {
       try {
-        // ✅ CORS-safe call via rewrite
-        const res = await fetch("https://nithi-billing.ddnsgeek.com/sarees/products/get-products");
+        const res = await fetch("https://sarees-backend-9wq0.onrender.com/products/get-products");
 
         if (!res.ok) {
           throw new Error("API response not OK");
         }
 
         const data = await res.json();
-       
-      
-        // ✅ filter loom + active
+
         const loomProducts = Array.isArray(data.products)
           ? data.products.filter(
               (item) => item.loom === true && item.status === "active"
@@ -66,22 +143,24 @@ const HomeProduct = () => {
 
   return (
     <section className="homeproduct-section" id="offers">
-      {/* Hot of the Loom */}
-      <div className="homeproduct-header" >
+
+      {/* Hot of the Loom — live API data, 5 per row */}
+      <div className="section-heading">
+        <span className="eyebrow">Fresh Off The Loom</span>
         <h2>Hot of the Loom</h2>
-        <Link to="/product" className="view-all">
-          View All →
-        </Link>
+        <div className="ornament">
+          <span className="ornament-line" />
+          <span className="ornament-dot">✦</span>
+          <span className="ornament-line" />
+        </div>
       </div>
 
-      <div className="homeproduct-grid">
+      <div className="homeproduct-grid grid-5">
         {loading ? (
-          <p>Loading products...</p>
+          <p className="state-msg">Loading products...</p>
         ) : hotLoom.length > 0 ? (
           hotLoom.map((product) => (
             <div key={product._id} className="homeproduct-card">
-              {/* <span className="wishlist">♡</span> */}
-
               <div className="image-wrap">
                 <img
                   src={product.image}
@@ -92,9 +171,7 @@ const HomeProduct = () => {
                 />
                 <div className="hover-overlay">
                   <Link to="/product">
-                    <button className="view-product-btn">
-                      View Product
-                    </button>
+                    <button className="view-product-btn">View Product</button>
                   </Link>
                 </div>
               </div>
@@ -106,24 +183,31 @@ const HomeProduct = () => {
             </div>
           ))
         ) : (
-          <p>No Hot Loom products available at the moment.</p>
+          <p className="state-msg">No Hot Loom products available at the moment.</p>
         )}
       </div>
 
-      {/* Shop By Occasion */}
+      {/* <div className="view-all-wrap">
+        <Link to="/product" className="pill-btn">
+          View Full Boutique →
+        </Link>
+      </div> */}
+
+      {/* Shop By Occasion — 10 items */}
       <div className="wrap">
-        <div className="homeproduct-header">
+        <div className="section-heading">
+          <span className="eyebrow">Curated Edits</span>
           <h2>Shop By Occasion</h2>
-          <Link to="/product" className="view-all">
-            View All →
-          </Link>
+          <div className="ornament">
+            <span className="ornament-line" />
+            <span className="ornament-dot">✦</span>
+            <span className="ornament-line" />
+          </div>
         </div>
 
-        <div className="homeproduct-grid">
+        <div className="homeproduct-grid grid-5">
           {productss.map((item) => (
             <div key={item.id} className="homeproduct-card card-border">
-              {/* <span className="wishlist">♡</span> */}
-
               <div className="image-wrap">
                 <img
                   src={item.image}
@@ -134,9 +218,7 @@ const HomeProduct = () => {
                 />
                 <div className="hover-overlay">
                   <Link to="/product">
-                    <button className="view-product-btn">
-                      View Product
-                    </button>
+                    <button className="view-product-btn">View Product</button>
                   </Link>
                 </div>
               </div>
@@ -147,22 +229,30 @@ const HomeProduct = () => {
             </div>
           ))}
         </div>
+
+        {/* <div className="view-all-wrap">
+          <Link to="/product" className="pill-btn">
+            View Full Boutique →
+          </Link>
+        </div> */}
       </div>
 
-      {/* Bestsellers */}
+      {/* Our Bestsellers — 10 items */}
       <div className="wrap">
-        <div className="homeproduct-header">
+        <div className="section-heading">
+          <span className="eyebrow">Customer Favorites</span>
           <h2>Our Bestsellers</h2>
-          <Link to="/product" className="view-all">
-            View All →
-          </Link>
+          <div className="ornament">
+            <span className="ornament-line" />
+            <span className="ornament-dot">✦</span>
+            <span className="ornament-line" />
+          </div>
         </div>
 
-        <div className="homeproduct-grid">
+        <div className="homeproduct-grid grid-5">
           {products.map((item) => (
             <div key={item.id} className="homeproduct-card">
               {item.isNew && <span className="badge-new">NEW</span>}
-              {/* <span className="wishlist">♡</span> */}
 
               <div className="image-wrap">
                 <img
@@ -174,9 +264,7 @@ const HomeProduct = () => {
                 />
                 <div className="hover-overlay">
                   <Link to="/product">
-                    <button className="view-product-btn">
-                      View Product
-                    </button>
+                    <button className="view-product-btn">View Product</button>
                   </Link>
                 </div>
               </div>
@@ -187,6 +275,37 @@ const HomeProduct = () => {
               </div>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Dual banner — Sarees / Jewelry */}
+      <div className="banner-duo">
+        <div
+          className="banner-card"
+          style={{ backgroundImage: `url(${IMG.bannerSaree})` }}
+        >
+          <div className="banner-contents">
+            <span className="banner-eyebrow">Collection</span>
+            <h3>Sarees</h3>
+            <p>Discover our traditional and elegant sarees.</p>
+            <Link to="/product" className="banner-btn">
+              Discover
+            </Link>
+          </div>
+        </div>
+
+        <div
+          className="banner-card"
+          style={{ backgroundImage: `url(${IMG.bannerJewelry})` }}
+        >
+          <div className="banner-contents">
+            <span className="banner-eyebrow">Indian</span>
+            <h3>Jewelry</h3>
+            <p>Jhumkas, necklaces and more to elevate your style.</p>
+            <Link to="/product" className="banner-btn">
+              Discover
+            </Link>
+          </div>
         </div>
       </div>
     </section>

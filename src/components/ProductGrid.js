@@ -64,7 +64,7 @@ const ProductGrid = ({ onViewDetails }) => {
         setError("");
 
         const res = await fetch(
-          `https://nithi-billing.ddnsgeek.com/sarees/products/get-products?page=${page}`
+          `https://sarees-backend-9wq0.onrender.com/products/get-products?page=${page}`
         );
 
         if (!res.ok) throw new Error("API response not OK");

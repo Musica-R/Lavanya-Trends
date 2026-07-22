@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import "../styles/Contact.css";
 import { FiMail } from "react-icons/fi";
@@ -45,7 +44,13 @@ ${message}
 
       {/* HEADER */}
       <div className="contact-header">
+        <span className="contact-eyebrow">Get In Touch</span>
         <h2>Customer Support</h2>
+        <div className="contact-ornament">
+          <span className="contact-ornament-line" />
+          <span className="contact-ornament-dot">✦</span>
+          <span className="contact-ornament-line" />
+        </div>
         <p>
           Need help with an order, product, or delivery?
           Our support team is here for you.
@@ -59,7 +64,7 @@ ${message}
             <h2>Contact Information</h2>
 
             <div className="contact-item">
-              <div className="icon blue">
+              <div className="icon">
                 <FiMail />
               </div>
               <div className="text">
@@ -69,7 +74,7 @@ ${message}
             </div>
 
             <div className="contact-item">
-              <div className="icon green">
+              <div className="icon">
                 <FaWhatsapp />
               </div>
               <div className="text">
@@ -79,7 +84,7 @@ ${message}
             </div>
 
             <div className="contact-item">
-              <div className="icon orange">
+              <div className="icon">
                 <FaPhoneAlt />
               </div>
               <div className="text">
@@ -89,7 +94,7 @@ ${message}
             </div>
 
             <div className="contact-item">
-              <div className="icon purple">
+              <div className="icon">
                 <IoLocationOutline />
               </div>
               <div className="text">
