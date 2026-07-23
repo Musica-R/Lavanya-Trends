@@ -8,6 +8,9 @@ import "../styles/Mainpro.css";
    (swap these for your own product shoots whenever you're ready —
    just replace the URL string, everything else keeps working).
    ========================================================= */
+
+const API_URL = process.env.REACT_APP_API_URL;
+
 const IMG = {
   saree1: "https://images.unsplash.com/photo-1618901185975-d59f7091bcfe?auto=format&fit=crop&w=800&q=80",
   saree2: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=800&q=80",
@@ -20,14 +23,14 @@ const IMG = {
   saree9: "https://images.unsplash.com/photo-1610030469668-8e9f641aaf27?auto=format&fit=crop&w=800&q=80",
   saree10: "https://images.unsplash.com/photo-1610189012906-4c0aa9b9781e?auto=format&fit=crop&w=800&q=80",
 
-  occ1: "https://images.unsplash.com/photo-1610030468706-9a6dbad49b0a?auto=format&fit=crop&w=800&q=80",
-  occ2: "https://images.unsplash.com/photo-1610030469839-f909584b43f1?auto=format&fit=crop&w=800&q=80",
-  occ3: "https://images.unsplash.com/photo-1610189025857-f42fe6e8dd91?auto=format&fit=crop&w=800&q=80",
-  occ4: "https://images.unsplash.com/photo-1615886753866-79396abc446e?auto=format&fit=crop&w=800&q=80",
-  occ5: "https://images.unsplash.com/photo-1688382654723-a7366006519b?auto=format&fit=crop&w=800&q=80",
-  occ6: "https://images.unsplash.com/photo-1631698532383-97ffe7c223c7?auto=format&fit=crop&w=800&q=80",
-  occ7: "https://images.unsplash.com/photo-1671642883395-0ab89c3ac890?auto=format&fit=crop&w=800&q=80",
-  occ8: "https://images.unsplash.com/photo-1601121141461-9d6647bca1ed?auto=format&fit=crop&w=800&q=80",
+  occ1: "/ass/m1.jpg",
+  occ2: "/ass/b1.jpg",
+  occ3: "/ass/o1.jpg",
+  occ4: "/ass/p1.jpg",
+  occ5: "/ass/f1.jpg",
+  occ6: "/ass/jw1.jpg",
+  occ7: "/ass/sim.jpg",
+  occ8: "/ass/ear1.jpg",
   occ9: "https://images.unsplash.com/photo-1638617501607-5dfb8b079ebf?auto=format&fit=crop&w=800&q=80",
   occ10: "https://images.unsplash.com/photo-1600862754152-80a263dd564f?auto=format&fit=crop&w=800&q=80",
 
@@ -58,7 +61,7 @@ const productss = [
   { id: 5, name: "Festive Edit", image: IMG.occ5 },
   { id: 6, name: "Engagement Special", image: IMG.occ6 },
   { id: 7, name: "Everyday Jewelry", image: IMG.occ7 },
-  { id: 8, name: "Reception Sarees", image: IMG.occ8 },
+  { id: 8, name: "Earrings", image: IMG.occ8 },
   { id: 9, name: "Bridal Jewelry", image: IMG.occ9 },
   { id: 10, name: "Statement Necklaces", image: IMG.occ10 },
 ];
@@ -108,6 +111,13 @@ const features = [
   },
 ];
 
+/* Helper: format a numeric/string price into ₹ with thousands separators */
+const formatPrice = (value) => {
+  const num = Number(value);
+  if (Number.isNaN(num)) return value;
+  return `₹${num.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
+};
+
 const HomeProduct = () => {
   const [hotLoom, setHotLoom] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -115,7 +125,7 @@ const HomeProduct = () => {
   useEffect(() => {
     const fetchHotLoom = async () => {
       try {
-        const res = await fetch("https://sarees-backend-9wq0.onrender.com/products/get-products");
+        const res = await fetch(`${API_URL}/products/get-products`);
 
         if (!res.ok) {
           throw new Error("API response not OK");
@@ -143,7 +153,6 @@ const HomeProduct = () => {
 
   return (
     <section className="homeproduct-section" id="offers">
-
       {/* Hot of the Loom — live API data, 5 per row */}
       <div className="section-heading">
         <span className="eyebrow">Fresh Off The Loom</span>
@@ -159,29 +168,57 @@ const HomeProduct = () => {
         {loading ? (
           <p className="state-msg">Loading products...</p>
         ) : hotLoom.length > 0 ? (
-          hotLoom.map((product) => (
-            <div key={product._id} className="homeproduct-card">
-              <div className="image-wrap">
-                <img
-                  src={product.image}
-                  alt={product.name || "Saree"}
-                  width={350}
-                  height={500}
-                  className="product-image"
-                />
-                <div className="hover-overlay">
-                  <Link to="/product">
-                    <button className="view-product-btn">View Product</button>
-                  </Link>
+          hotLoom.map((product) => {
+            // Actual API shape: id (not _id), and image lives inside
+            // attributes[0].image_url (there's no top-level `image` field).
+            const firstAttr =
+              Array.isArray(product.attributes) && product.attributes.length > 0
+                ? product.attributes[0]
+                : null;
+
+            const imageUrl = firstAttr?.image_url || "/ass/placeholder.jpg";
+
+            const hasOffer =
+              product.offerPrice &&
+              Number(product.offerPrice) < Number(product.price);
+
+            return (
+              <div key={product.id} className="homeproduct-card">
+                {product.isNewArrival && <span className="badge-new">NEW</span>}
+
+                <div className="image-wrap">
+                  <img
+                    src={imageUrl}
+                    alt={product.name || "Saree"}
+                    width={350}
+                    height={500}
+                    className="product-image"
+                  />
+                  <div className="hover-overlay">
+                    <Link to={`/product/${product.id}`}>
+                      <button className="view-product-btn">View Product</button>
+                    </Link>
+                  </div>
+                </div>
+
+                <div className="product-infos">
+                  <h3>{product.name}</h3>
+                  {hasOffer ? (
+                    <p className="price">
+                      <span className="price-offer">
+                        {formatPrice(product.offerPrice)}
+                      </span>{" "}
+                      <span className="og-price">
+                        {formatPrice(product.price)}
+                      </span>
+                    </p>
+                  ) : (
+                    <p className="price">{formatPrice(product.price)}</p>
+                  )}
                 </div>
               </div>
-
-              <div className="product-infos">
-                <h3>{product.name}</h3>
-                <p className="price">₹{product.price}</p>
-              </div>
-            </div>
-          ))
+            );
+          })
         ) : (
           <p className="state-msg">No Hot Loom products available at the moment.</p>
         )}

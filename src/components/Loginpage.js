@@ -6,8 +6,10 @@ import { handleLoginError, handleRegisterError } from "../Lottie/helper";
 import loginImg from "../assets/logi.png";
 import { PiFlowerLotusThin } from "react-icons/pi";
 
-const LOGIN_API = "https://sarees-backend-9wq0.onrender.com/new/login";
-const REGISTER_API = "https://sarees-backend-9wq0.onrender.com/new/register";
+const API_URL = process.env.REACT_APP_API_URL;
+
+const LOGIN_API = `${API_URL}/new/login`;
+const REGISTER_API = `${API_URL}/new/register`;
 
 /* ---------------- Inline icons (no extra deps) ---------------- */
 const IconMail = () => (

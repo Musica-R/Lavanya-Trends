@@ -12,6 +12,7 @@ import AddToCartPage from "./pages/AddToCartPage";
 import JewelryPage from "./pages/JewelryPage";
 import ProfilePage from "./components/Profilepage";
 import LoginPage from "./components/Loginpage";
+import About from "./pages/About";
 
 export default function App() {
   return (
@@ -23,6 +24,7 @@ export default function App() {
           <Route path="/product" element={<ProductPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/jew" element={<JewelryPage />} />
+          <Route path="/about" element={<About />} />
           <Route path="/addtocart" element={<AddToCartPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/login" element={<LoginPage />} />

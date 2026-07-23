@@ -1,0 +1,508 @@
+/* =========================================================
+   ABOUT PAGE — shared palette with the homepage:
+   maroon #8b1e3f · gold #f3d9b1 · cream #fffaf4 · ink #2b1016
+========================================================= */
+
+.about-eyebrow {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #8b1e3f;
+  margin-bottom: 4px;
+}
+
+.about-section-title {
+  font-family: "Playfair Display", serif;
+  font-style: italic;
+  font-size: 34px;
+  color: #2b1016;
+  margin: 0 0 12px;
+}
+
+.about-section-subtitle {
+  font-size: 15px;
+  color: #6b5a5f;
+  max-width: 520px;
+  line-height: 1.6;
+}
+
+.about-divider {
+  display: block;
+  width: 100%;
+  max-width: 200px;
+  height: 1px;
+  background: rgba(139, 30, 63, 0.35);
+  margin: 4px 0 4px;
+}
+
+/* ===== buttons, scoped to About so they read correctly on light backgrounds ===== */
+.about-btn-primary,
+.about-btn-secondary {
+  display: inline-block;
+  padding: 13px 30px;
+  border-radius: 30px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  width: fit-content;
+}
+
+.about-btn-primary {
+  background: #8b1e3f;
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(139, 30, 63, 0.25);
+}
+
+.about-btn-primary:hover {
+  background: #6f1730;
+  transform: translateY(-2px);
+}
+
+.about-btn-secondary {
+  border: 2px solid #8b1e3f;
+  color: #8b1e3f;
+  font-family: "Playfair Display", serif;
+  font-style: italic;
+  letter-spacing: 0.5px;
+}
+
+.about-btn-secondary:hover {
+  background: #8b1e3f;
+  color: #fff;
+}
+
+/* =========================================================
+   OUR STORY — client/shop image left, copy right
+========================================================= */
+.about-story {
+  display: grid;
+  grid-template-columns: 0.9fr 1fr;
+  align-items: center;
+  gap: 56px;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 88px 24px 64px;
+  background: #fffaf4;
+}
+
+.about-story-media {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+/* Signature: a folded "thread frame" around the shop photo,
+   echoing the fold of a saree rather than a plain rectangle */
+.about-frame {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  aspect-ratio: 4 / 5;
+  border-radius: 6px 40px 6px 40px;
+  overflow: hidden;
+  box-shadow: 0 24px 48px rgba(43, 16, 22, 0.18);
+  border: 6px solid #fff;
+  outline: 1px solid rgba(139, 30, 63, 0.15);
+}
+
+.about-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* a dashed gold "zari thread" trailing off the frame's corner */
+.about-frame-thread {
+  position: absolute;
+  right: -18px;
+  bottom: -18px;
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  border: 2px dashed #f3d9b1;
+  z-index: -1;
+}
+
+.about-story-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.about-title {
+  font-family: "Playfair Display", serif;
+  font-style: italic;
+  font-weight: 700;
+  font-size: 46px;
+  line-height: 1.2;
+  letter-spacing: 0.5px;
+  color: #2b1016;
+  margin: 0;
+}
+
+.about-title span {
+  color: #8b1e3f;
+}
+
+.about-desc {
+  font-size: 16px;
+  line-height: 1.7;
+  color: #4a3a3e;
+  max-width: 540px;
+}
+
+.about-highlights {
+  display: flex;
+  gap: 36px;
+  margin: 10px 0 8px;
+  flex-wrap: wrap;
+}
+
+.about-highlight {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.about-highlight-num {
+  font-family: "Playfair Display", serif;
+  font-style: italic;
+  font-size: 26px;
+  color: #8b1e3f;
+}
+
+.about-highlight-label {
+  font-size: 13px;
+  color: #6b5a5f;
+  max-width: 120px;
+}
+
+.about-story-actions {
+  margin-top: 10px;
+}
+
+/* =========================================================
+   WHAT WE SELL — sarees & jewelry
+========================================================= */
+.about-offerings {
+  background: #fff5ea;
+  padding: 72px 24px;
+  text-align: center;
+}
+
+.about-offerings-heading {
+  max-width: 620px;
+  margin: 0 auto 44px;
+}
+
+.about-offerings-heading .about-section-subtitle {
+  margin: 0 auto;
+}
+
+.about-offerings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(260px, 420px));
+  justify-content: center;
+  gap: 32px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.about-offer-card {
+  background: #fffaf4;
+  border-radius: 18px;
+  overflow: hidden;
+  text-align: left;
+  box-shadow: 0 10px 26px rgba(43, 16, 22, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.about-offer-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 34px rgba(43, 16, 22, 0.14);
+}
+
+.about-offer-media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+}
+
+.about-offer-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.about-offer-tag {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  background: rgba(20, 4, 10, 0.55);
+  color: #f3d9b1;
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border-radius: 20px;
+}
+
+.about-offer-name {
+  font-family: "Playfair Display", serif;
+  font-style: italic;
+  font-size: 24px;
+  color: #2b1016;
+  margin: 20px 24px 6px;
+}
+
+.about-offer-desc {
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: #6b5a5f;
+  margin: 0 24px 16px;
+}
+
+.about-offer-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 24px 22px;
+  color: #8b1e3f;
+  font-weight: 600;
+  font-size: 14.5px;
+  text-decoration: none;
+}
+
+.about-offer-link svg {
+  transition: transform 0.25s ease;
+}
+
+.about-offer-link:hover svg {
+  transform: translateX(4px);
+}
+
+/* =========================================================
+   VISIT US — location
+========================================================= */
+.about-visit {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: stretch;
+  gap: 48px;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 80px 24px 96px;
+  background: #fffaf4;
+}
+
+.about-visit-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  justify-content: center;
+}
+
+.about-visit-copy {
+  max-width: 460px;
+}
+
+.about-visit-details {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  max-width: 460px;
+}
+
+.about-visit-details li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-left: 2px solid #f3d9b1;
+  padding-left: 14px;
+}
+
+.about-visit-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #8b1e3f;
+}
+
+.about-visit-details li span:last-child {
+  font-size: 15px;
+  color: #2b1016;
+}
+
+.about-visit-btn {
+  margin-top: 8px;
+}
+
+.about-visit-map {
+  border-radius: 18px;
+  overflow: hidden;
+  min-height: 320px;
+  box-shadow: 0 16px 34px rgba(43, 16, 22, 0.14);
+}
+
+.about-visit-map iframe {
+  width: 100%;
+  height: 100%;
+  min-height: 320px;
+  border: 0;
+  display: block;
+}
+
+/* =========================================================
+   OUR GALLERY — 4-image grid of shop, team & craft
+========================================================= */
+.about-gallery {
+  background: #fffaf4;
+  padding: 72px 24px 88px;
+  text-align: center;
+}
+
+.about-gallery-heading {
+  max-width: 620px;
+  margin: 0 auto 40px;
+}
+
+.about-gallery-heading .about-section-subtitle {
+  margin: 0 auto;
+}
+
+.about-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+.about-gallery-item {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  aspect-ratio: 3 / 4;
+  box-shadow: 0 10px 24px rgba(43, 16, 22, 0.12);
+}
+
+.about-gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
+}
+
+.about-gallery-item:hover img {
+  transform: scale(1.06);
+}
+
+.about-gallery-caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 14px 12px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  color: #fffaf4;
+  text-align: left;
+  background: linear-gradient(to top, rgba(20, 4, 10, 0.75), rgba(20, 4, 10, 0));
+}
+
+@media (max-width: 1024px) {
+  .about-gallery-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .about-gallery {
+    padding: 56px 20px 64px;
+  }
+
+  .about-gallery-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+@media (max-width: 1024px) {
+  .about-story {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    padding: 64px 24px 48px;
+  }
+
+  .about-story-media {
+    order: -1;
+  }
+
+  .about-title {
+    font-size: 38px;
+  }
+
+  .about-offerings-grid {
+    grid-template-columns: minmax(260px, 420px);
+  }
+
+  .about-visit {
+    grid-template-columns: 1fr;
+    padding: 56px 24px 72px;
+  }
+
+  .about-visit-map {
+    min-height: 280px;
+  }
+}
+
+@media (max-width: 480px) {
+  .about-story-content {
+    align-items: center;
+    text-align: center;
+  }
+
+  .about-title,
+  .about-desc,
+  .about-highlights {
+    align-self: center;
+  }
+
+  .about-highlights {
+    justify-content: center;
+  }
+
+  .about-title {
+    font-size: 30px;
+  }
+
+  .about-frame {
+    max-width: 320px;
+  }
+
+  .about-section-title {
+    font-size: 26px;
+  }
+
+  .about-offer-name,
+  .about-offer-desc,
+  .about-offer-link {
+    margin-left: 18px;
+    margin-right: 18px;
+  }
+}

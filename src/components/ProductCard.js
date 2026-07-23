@@ -11,6 +11,17 @@ const fillStyle = {
     height: "100%",
 };
 
+const FALLBACK_IMAGE = "/placeholder-saree.jpg";
+
+// The API's first attribute entry may not have an image (some variants
+// have image_url: null), so we walk the list and use the first one
+// that actually has one, falling back to a placeholder if none do.
+const getProductImage = (product) => {
+    const attrs = product.attributes || [];
+    const withImage = attrs.find((a) => a.image_url);
+    return withImage?.image_url || FALLBACK_IMAGE;
+};
+
 const ProductCard = ({ product, onViewDetails }) => {
     const { addToCart } = useCart();
 
@@ -21,16 +32,22 @@ const ProductCard = ({ product, onViewDetails }) => {
     const originalPrice =
         discount > 0 ? Math.round(price + (price * discount) / 100) : price;
 
+    const imageUrl = getProductImage(product);
+
     return (
         <div className="product-card" id="product">
             {/* Product Image */}
             <div className="product-image-container">
 
                 <img
-                    src={product.image}
+                    src={imageUrl}
                     alt={product.name}
                     style={fillStyle}
                     className="product-image"
+                    onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = FALLBACK_IMAGE;
+                    }}
                 />
                 <div className="product-overlay">
                     <button className="view-details-btn" onClick={() => onViewDetails(product)}>

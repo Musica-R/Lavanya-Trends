@@ -37,7 +37,7 @@ const Header = () => {
     { to: "/", label: "New Arrivals" },
     { to: "/product", label: "Shop Sarees" },
     { to: "/jew", label: "Jewellery" },
-    { to: "/contact", label: "About Us" },
+    { to: "/about", label: "About Us" },
     { to: "/contact", label: "Customer Support" },
   ];
 

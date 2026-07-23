@@ -11,7 +11,9 @@ const PRICE_PRESETS = [
   { label: "Above ₹5999", min: 5999, max: Infinity },
 ];
 
-const FABRIC_KEYWORDS = ["Silk", "Cotton", "Lycra", "Net", "Tissue", "Modal", "Polyester"];
+const API_URL = process.env.REACT_APP_API_URL;
+
+
 
 const SORT_OPTIONS = [
   { value: "popularity", label: "Popularity" },
@@ -22,6 +24,12 @@ const SORT_OPTIONS = [
 ];
 
 const CATEGORY_VISIBLE_LIMIT = 6;
+const PAGE_SIZE = 16;
+
+// Categories that should never appear in the saree shop (e.g. jewelry).
+// Backend still returns these in the product list, so we filter them
+// out here rather than relying on the API to drop them.
+const EXCLUDED_CATEGORIES = ["gold"];
 
 // The API doesn't return a rating field yet, but ProductCard reads
 // product.rating to fill stars. This derives a stable per-product
@@ -33,16 +41,25 @@ const withRating = (product) => {
   return { ...product, rating: Math.min(rating, 5) };
 };
 
+const isExcludedCategory = (product) => {
+  const name = product.category?.category?.toLowerCase() || "";
+  return EXCLUDED_CATEGORIES.includes(name);
+};
+
 const ProductGrid = ({ onViewDetails }) => {
   const { searchTerm, setSearchTerm } = useSearch();
 
   const [products, setProducts] = useState([]);
-  const [total, setTotal] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
   const [page, setPage] = useState(1);
 
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedSubcategory, setSelectedSubcategory] = useState("All");
+  const [selectedColor, setSelectedColor] = useState("All");
   const [selectedFabrics, setSelectedFabrics] = useState([]);
+
   const [showAllCategories, setShowAllCategories] = useState(false);
   const [fabricOpen, setFabricOpen] = useState(false);
 
@@ -50,34 +67,36 @@ const ProductGrid = ({ onViewDetails }) => {
   const [priceMax, setPriceMax] = useState(12999);
   const [activePreset, setActivePreset] = useState(null);
 
-  const [sortBy, setSortBy] = useState("popularity");
+  // Custom min/max entry fields — user must enter Min first, and Max
+  // must be at least ₹10 higher than Min before it's accepted.
+  const [minInput, setMinInput] = useState("");
+  const [maxInput, setMaxInput] = useState("");
+  const [priceError, setPriceError] = useState("");
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [sortBy, setSortBy] = useState("popularity");
 
   const pillsRef = useRef(null);
 
+  // Fetch the full product list once. Filtering + pagination below are
+  // handled entirely on the client so the sidebar filters, price range
+  // and the 16-per-page grid all work off the same data set.
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
         setError("");
 
-        const res = await fetch(
-          `https://sarees-backend-9wq0.onrender.com/products/get-products?page=${page}`
-        );
-
+        const res = await fetch(`${API_URL}/products/get-products`);
         if (!res.ok) throw new Error("API response not OK");
 
         const data = await res.json();
+        console.log(data);
 
         const activeProducts = Array.isArray(data.products)
           ? data.products.filter((item) => item.status === "active")
           : [];
 
         setProducts(activeProducts);
-        setTotal(data.total ?? activeProducts.length);
-        setTotalPages(data.totalPages ?? 1);
       } catch (err) {
         console.error("Failed to fetch products:", err);
         setError("Unable to load products. Please try again later.");
@@ -88,24 +107,72 @@ const ProductGrid = ({ onViewDetails }) => {
     };
 
     fetchProducts();
-  }, [page]);
+  }, []);
 
-  const categories = useMemo(
-    () => ["All", ...new Set(products.map((p) => p.category?.category).filter(Boolean))],
+  // Sarees only — jewelry/gold products are dropped everywhere: filters,
+  // colors, pills, and the grid itself.
+  const sareeProducts = useMemo(
+    () => products.filter((p) => !isExcludedCategory(p)),
     [products]
   );
+
+  const categories = useMemo(
+    () => ["All", ...new Set(sareeProducts.map((p) => p.category?.category).filter(Boolean))],
+    [sareeProducts]
+  );
+
+  // Subcategories only make sense once a category is picked, so this
+  // list (and the sidebar block for it) stays empty on "All".
+  const subcategories = useMemo(() => {
+    if (selectedCategory === "All") return [];
+    const pool = sareeProducts.filter((p) => p.category?.category === selectedCategory);
+    return [...new Set(pool.map((p) => p.subcategory?.name).filter(Boolean))];
+  }, [sareeProducts, selectedCategory]);
+
+  // Colors only make sense once a subcategory is picked.
+  const colors = useMemo(() => {
+    if (selectedSubcategory === "All") return [];
+    const pool = sareeProducts.filter(
+      (p) =>
+        p.category?.category === selectedCategory && p.subcategory?.name === selectedSubcategory
+    );
+    const all = pool.flatMap((p) => (p.attributes || []).map((a) => a.color).filter(Boolean));
+    return [...new Set(all)];
+  }, [sareeProducts, selectedCategory, selectedSubcategory]);
 
   const visibleSidebarCategories = showAllCategories
     ? categories
     : categories.slice(0, CATEGORY_VISIBLE_LIMIT);
 
+  const handleCategorySelect = (category) => {
+    setSelectedCategory(category);
+    setSelectedSubcategory("All");
+    setSelectedColor("All");
+    setPage(1);
+  };
+
+  const handleSubcategorySelect = (subcategory) => {
+    setSelectedSubcategory((prev) => (prev === subcategory ? "All" : subcategory));
+    setSelectedColor("All");
+    setPage(1);
+  };
+
+  const handleColorSelect = (color) => {
+    setSelectedColor((prev) => (prev === color ? "All" : color));
+    setPage(1);
+  };
+
   const toggleFabric = (fabric) => {
     setSelectedFabrics((prev) =>
       prev.includes(fabric) ? prev.filter((f) => f !== fabric) : [...prev, fabric]
     );
+    setPage(1);
   };
 
   const applyPreset = (preset) => {
+    setMinInput("");
+    setMaxInput("");
+    setPriceError("");
     if (activePreset?.label === preset.label) {
       setActivePreset(null);
       setPriceMin(499);
@@ -115,16 +182,54 @@ const ProductGrid = ({ onViewDetails }) => {
     setActivePreset(preset);
     setPriceMin(preset.min);
     setPriceMax(preset.max === Infinity ? 12999 : preset.max);
+    setPage(1);
+  };
+
+  // Custom price entry: Min must be filled in first, then Max must be
+  // at least ₹10 above Min (e.g. Min 100 → Max must be ≥ 110; the
+  // "100–500, then 500–1000" style ranges both work fine since
+  // 500 > 100+10 and 1000 > 500+10).
+  const applyCustomPrice = () => {
+    if (minInput === "") {
+      setPriceError("Please enter a minimum price first.");
+      return;
+    }
+    const min = Number(minInput);
+    if (Number.isNaN(min) || min < 0) {
+      setPriceError("Enter a valid minimum price.");
+      return;
+    }
+    if (maxInput === "") {
+      setPriceError("Now enter a maximum price.");
+      return;
+    }
+    const max = Number(maxInput);
+    if (Number.isNaN(max) || max <= min + 10) {
+      setPriceError(`Maximum price must be at least ₹${min + 10}.`);
+      return;
+    }
+
+    setPriceError("");
+    setActivePreset(null);
+    setPriceMin(min);
+    setPriceMax(max);
+    setPage(1);
   };
 
   const clearAllFilters = () => {
     setSelectedCategory("All");
+    setSelectedSubcategory("All");
+    setSelectedColor("All");
     setSelectedFabrics([]);
     setPriceMin(499);
     setPriceMax(12999);
     setActivePreset(null);
+    setMinInput("");
+    setMaxInput("");
+    setPriceError("");
     setSearchTerm("");
     setSortBy("popularity");
+    setPage(1);
   };
 
   const scrollPills = (dir) => {
@@ -133,34 +238,56 @@ const ProductGrid = ({ onViewDetails }) => {
   };
 
   const filteredProducts = useMemo(() => {
-    let list = products.filter((product) => {
+    let list = sareeProducts.filter((product) => {
       const name = product.name?.toLowerCase() || "";
       const desc = product.desc?.toLowerCase() || "";
       const category = product.category?.category?.toLowerCase() || "";
       const search = searchTerm?.toLowerCase() || "";
-      const price = parseFloat(product.price) || 0;
+      const price = parseFloat(product.offerPrice || product.price) || 0;
 
       const matchCategory =
         selectedCategory === "All" || product.category?.category === selectedCategory;
+
+      const matchSubcategory =
+        selectedSubcategory === "All" || product.subcategory?.name === selectedSubcategory;
+
+      const matchColor =
+        selectedColor === "All" ||
+        (product.attributes || []).some(
+          (a) => a.color?.toLowerCase() === selectedColor.toLowerCase()
+        );
+
+      const matchFabric =
+        selectedFabrics.length === 0 ||
+        selectedFabrics.some((f) => name.includes(f.toLowerCase()) || desc.includes(f.toLowerCase()));
 
       const matchSearch =
         !search || name.includes(search) || category.includes(search) || desc.includes(search);
 
       const matchPrice = price >= priceMin && price <= priceMax;
 
-      const matchFabric =
-        selectedFabrics.length === 0 ||
-        selectedFabrics.some((f) => name.includes(f.toLowerCase()) || desc.includes(f.toLowerCase()));
-
-      return matchCategory && matchSearch && matchPrice && matchFabric;
+      return (
+        matchCategory &&
+        matchSubcategory &&
+        matchColor &&
+        matchFabric &&
+        matchSearch &&
+        matchPrice
+      );
     });
 
     switch (sortBy) {
       case "price_low":
-        list = [...list].sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
+        list = [...list].sort(
+          (a, b) =>
+            (parseFloat(a.offerPrice || a.price) || 0) - (parseFloat(b.offerPrice || b.price) || 0)
+        );
         break;
       case "price_high":
-        list = [...list].sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
+        list = [...list].sort(
+          (a, b) =>
+            (parseFloat(b.offerPrice || b.price) || 0) - (parseFloat(a.offerPrice || a.price) || 0)
+        );
         break;
       case "newest":
         list = [...list].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -173,10 +300,28 @@ const ProductGrid = ({ onViewDetails }) => {
     }
 
     return list.map(withRating);
-  }, [products, selectedCategory, searchTerm, priceMin, priceMax, selectedFabrics, sortBy]);
+  }, [
+    sareeProducts,
+    selectedCategory,
+    selectedSubcategory,
+    selectedColor,
+    selectedFabrics,
+    searchTerm,
+    priceMin,
+    priceMax,
+    sortBy,
+  ]);
 
-  const rangeStart = total === 0 ? 0 : (page - 1) * (products.length || 0) + 1;
-  const rangeEnd = rangeStart + filteredProducts.length - 1;
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const paginatedProducts = filteredProducts.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
+
+  const total = filteredProducts.length;
+  const rangeStart = total === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
+  const rangeEnd = Math.min(currentPage * PAGE_SIZE, total);
 
   return (
     <section className="product-section" id="products">
@@ -224,35 +369,9 @@ const ProductGrid = ({ onViewDetails }) => {
               </button>
             </div>
 
+            {/* Price Range */}
             <div className="filter-block">
               <p className="filter-block-title">Price Range</p>
-              {/* <div className="price-slider">
-                <input
-                  type="range"
-                  min={499}
-                  max={12999}
-                  value={priceMin}
-                  onChange={(e) => {
-                    setActivePreset(null);
-                    setPriceMin(Math.min(Number(e.target.value), priceMax - 100));
-                  }}
-                />
-                <input
-                  type="range"
-                  min={499}
-                  max={12999}
-                  value={priceMax}
-                  onChange={(e) => {
-                    setActivePreset(null);
-                    setPriceMax(Math.max(Number(e.target.value), priceMin + 100));
-                  }}
-                />
-              </div> */}
-
-              {/* <div className="price-values">
-                <span>₹{priceMin.toLocaleString("en-IN")}</span>
-                <span>₹{priceMax >= 12999 ? "12,999+" : priceMax.toLocaleString("en-IN")}</span>
-              </div> */}
 
               <div className="price-presets">
                 {PRICE_PRESETS.map((preset) => (
@@ -266,8 +385,36 @@ const ProductGrid = ({ onViewDetails }) => {
                   </button>
                 ))}
               </div>
+
+              {/* Custom min/max entry. Min must be entered first; Max
+                  must be at least ₹10 above Min. */}
+              <div className="price-custom-row">
+                <input
+                  type="number"
+                  className="price-custom-input"
+                  placeholder="Min ₹"
+                  value={minInput}
+                  onChange={(e) => setMinInput(e.target.value)}
+                  min={0}
+                />
+                <span className="price-custom-sep">–</span>
+                <input
+                  type="number"
+                  className="price-custom-input"
+                  placeholder="Max ₹"
+                  value={maxInput}
+                  onChange={(e) => setMaxInput(e.target.value)}
+                  disabled={minInput === ""}
+                  min={0}
+                />
+              </div>
+              <button type="button" className="price-apply-btn" onClick={applyCustomPrice}>
+                Apply
+              </button>
+              {priceError && <p className="price-error">{priceError}</p>}
             </div>
 
+            {/* Categories */}
             <div className="filter-block">
               <p className="filter-block-title">Categories</p>
               <div className="category-checkbox-list">
@@ -276,7 +423,7 @@ const ProductGrid = ({ onViewDetails }) => {
                     <input
                       type="checkbox"
                       checked={selectedCategory === category}
-                      onChange={() => setSelectedCategory(category)}
+                      onChange={() => handleCategorySelect(category)}
                     />
                     <span>{category === "All" ? "All Sarees" : category}</span>
                   </label>
@@ -293,26 +440,43 @@ const ProductGrid = ({ onViewDetails }) => {
               )}
             </div>
 
-            <div className="filter-block">
-              <button type="button" className="fabric-toggle" onClick={() => setFabricOpen((o) => !o)}>
-                <span className="filter-block-title">Fabric</span>
-                <span className="fabric-plus">{fabricOpen ? "−" : "+"}</span>
-              </button>
-              {fabricOpen && (
+            {/* Subcategory — only appears once a category is picked */}
+            {selectedCategory !== "All" && subcategories.length > 0 && (
+              <div className="filter-block">
+                <p className="filter-block-title">Subcategory</p>
                 <div className="category-checkbox-list">
-                  {FABRIC_KEYWORDS.map((fabric) => (
-                    <label key={fabric} className="category-checkbox">
+                  {subcategories.map((sub) => (
+                    <label key={sub} className="category-checkbox">
                       <input
                         type="checkbox"
-                        checked={selectedFabrics.includes(fabric)}
-                        onChange={() => toggleFabric(fabric)}
+                        checked={selectedSubcategory === sub}
+                        onChange={() => handleSubcategorySelect(sub)}
                       />
-                      <span>{fabric}</span>
+                      <span>{sub}</span>
                     </label>
                   ))}
                 </div>
-              )}
-            </div>
+              </div>
+            )}
+
+            {/* Color — only appears once a subcategory is picked */}
+            {selectedSubcategory !== "All" && colors.length > 0 && (
+              <div className="filter-block">
+                <p className="filter-block-title">Color</p>
+                <div className="category-checkbox-list">
+                  {colors.map((color) => (
+                    <label key={color} className="category-checkbox">
+                      <input
+                        type="checkbox"
+                        checked={selectedColor === color}
+                        onChange={() => handleColorSelect(color)}
+                      />
+                      <span>{color}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
           </aside>
 
           {/* ---------- Main Content ---------- */}
@@ -322,7 +486,7 @@ const ProductGrid = ({ onViewDetails }) => {
                 <h2 className="shop-title">All Sarees</h2>
                 <p className="shop-count">
                   {total > 0
-                    ? `Showing ${rangeStart}–${rangeEnd < rangeStart ? rangeStart : rangeEnd} of ${total} products`
+                    ? `Showing ${rangeStart}–${rangeEnd} of ${total} products`
                     : "No products"}
                 </p>
               </div>
@@ -348,7 +512,7 @@ const ProductGrid = ({ onViewDetails }) => {
                   <button
                     key={category}
                     className={`category-btn ${selectedCategory === category ? "active" : ""}`}
-                    onClick={() => setSelectedCategory(category)}
+                    onClick={() => handleCategorySelect(category)}
                   >
                     {category}
                   </button>
@@ -373,8 +537,11 @@ const ProductGrid = ({ onViewDetails }) => {
             ) : (
               <>
                 <div className="product-grid show">
-                  {filteredProducts.map((product) => (
-                    <ProductCard key={product.id} product={product} onViewDetails={onViewDetails} />
+                  {paginatedProducts.map((product) => (
+                    // Double-click opens the full product modal.
+                    <div key={product.id} onDoubleClick={() => onViewDetails(product)}>
+                      <ProductCard product={product} onViewDetails={onViewDetails} />
+                    </div>
                   ))}
                 </div>
 
@@ -388,7 +555,7 @@ const ProductGrid = ({ onViewDetails }) => {
                   <div className="pagination">
                     <button
                       type="button"
-                      disabled={page <= 1}
+                      disabled={currentPage <= 1}
                       onClick={() => setPage((p) => Math.max(1, p - 1))}
                     >
                       ‹ Prev
@@ -397,7 +564,7 @@ const ProductGrid = ({ onViewDetails }) => {
                       <button
                         key={p}
                         type="button"
-                        className={p === page ? "active" : ""}
+                        className={p === currentPage ? "active" : ""}
                         onClick={() => setPage(p)}
                       >
                         {p}
@@ -405,7 +572,7 @@ const ProductGrid = ({ onViewDetails }) => {
                     ))}
                     <button
                       type="button"
-                      disabled={page >= totalPages}
+                      disabled={currentPage >= totalPages}
                       onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                     >
                       Next ›
