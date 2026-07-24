@@ -3,10 +3,52 @@
    White/ivory replaces the gold accents from the reference layout
    ============================================================ */
 
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  position: relative; /* anchors any absolutely-positioned overflow so it can't escape */
+  margin: 0;
+}
+
+/* Bulletproof net: catches overflow from sibling components (banner, nav, etc.)
+   that live outside .lav-auth-page and aren't covered by this file.
+   #root / #app is the typical React mount point — adjust the selector to match yours. */
+#root,
+#app,
+.app {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+/* Generic safety net for scrolling ticker/marquee banners: if the banner's own
+   wrapper is missing overflow:hidden, target it here by its likely class names.
+   Replace with your actual banner class if different. */
+.promo-banner,
+.announcement-bar,
+.marquee,
+.ticker {
+  overflow: hidden;
+  white-space: nowrap;
+  width: 100%;
+  max-width: 100vw;
+}
+
 .lav-auth-page {
   min-height: 100vh;
   display: flex;
   background: #faf6f2;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 /* ---------------- LEFT BRAND PANEL ---------------- */
@@ -357,6 +399,95 @@
   }
 }
 
+/* ---------------- Mobile (≤425px) ---------------- */
+@media (max-width: 425px) {
+  
+  .lav-login-card {
+    padding: 28px 5px 24px;
+    border-radius: 16px;
+  }
+  .lav-auth-right{
+    padding: 20px 0px;
+  }
+
+  .lav-input-eye{
+   display: none;
+  }
+
+  .lav-card-logo-row {
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .lav-card-logo-line {
+    max-width: 44px;
+  }
+
+  .lav-card-logo-circle {
+    width: 44px;
+    height: 44px;
+  }
+
+  .lav-card-title {
+    font-size: 21px;
+  }
+
+  .lav-card-subtitle {
+    font-size: 13px;
+    margin-bottom: 22px;
+  }
+
+  .lav-input-group {
+    margin-bottom: 13px;
+  }
+
+  .lav-input-icon {
+    width: 40px;
+  }
+  .lav-login-card {
+    width: 90%;
+  }
+
+  .lav-input-group input {
+    /* 16px prevents iOS Safari auto-zoom on focus */
+    font-size: 16px;
+    padding: 12px 0px 12px 0;
+  }
+  
+  .lav-forgot-row {
+    margin: 5px 0 16px;
+  }
+
+  .lav-forgot-link {
+    font-size: 12.5px;
+  }
+
+  .lav-submit-btn {
+    padding: 12px;
+    font-size: 15px;
+  }
+
+  .lav-or-divider {
+    margin: 22px 0 16px;
+    font-size: 12.5px;
+  }
+
+  .lav-social-row {
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .lav-social-btn {
+    padding: 10px;
+    font-size: 13.5px;
+  }
+
+  .lav-login-toggle-text {
+    font-size: 13px;
+  }
+
+}
+
 /* ---------------- Small phones (≤360px, incl. 320px) ---------------- */
 @media (max-width: 360px) {
   .lav-auth-page {
@@ -422,6 +553,7 @@
 
   .lav-input-eye {
     padding: 0 10px;
+    display: none;
   }
 
   .lav-forgot-row {
@@ -458,7 +590,5 @@
   .lav-login-toggle-text {
     font-size: 12.5px;
   }
-  .lav-input-eye {
-    display: none;
-  }
+  
 }
