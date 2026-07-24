@@ -1,7 +1,8 @@
 .product-section {
   background: #f8f9fa;
   padding: 0px 0px 50px;
-  overflow-x: hidden; /* safety net: nothing in this section can force page-wide horizontal scroll */
+  overflow-x: hidden;
+  /* safety net: nothing in this section can force page-wide horizontal scroll */
 }
 
 .product-container {
@@ -35,13 +36,11 @@
 .banner-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    90deg,
-    rgba(248, 240, 231, 0.95) 0%,
-    rgba(248, 240, 231, 0.75) 45%,
-    rgba(248, 240, 231, 0.15) 75%,
-    rgba(248, 240, 231, 0) 100%
-  );
+  background: linear-gradient(90deg,
+      rgba(248, 240, 231, 0.95) 0%,
+      rgba(248, 240, 231, 0.75) 45%,
+      rgba(248, 240, 231, 0.15) 75%,
+      rgba(248, 240, 231, 0) 100%);
 }
 
 .banner-content {
@@ -95,11 +94,6 @@
    ========================================================== */
 .shop-layout {
   display: grid;
-  /* minmax(0, 1fr) — NOT plain 1fr — is what stops the main column
-     from being stretched wider than the viewport by its contents
-     (the category-pill row in particular). Plain `1fr` lets a grid
-     track grow to fit its content's intrinsic width, which is what
-     was pushing the last product card and the Sort control off-screen. */
   grid-template-columns: 270px minmax(0, 1fr);
   gap: 32px;
   align-items: start;
@@ -391,13 +385,14 @@
   font-weight: 700;
 }
 
-.fabric-toggle + .category-checkbox-list {
+.fabric-toggle+.category-checkbox-list {
   margin-top: 14px;
 }
 
 /* ---------- Main content ---------- */
 .shop-main {
-  min-width: 0; /* required so this column can shrink instead of overflowing */
+  min-width: 0;
+  /* required so this column can shrink instead of overflowing */
 }
 
 .shop-main-header {
@@ -457,7 +452,8 @@
   align-items: center;
   gap: 10px;
   margin-bottom: 24px;
-  min-width: 0; /* lets the pill row below shrink+scroll instead of overflowing the page */
+  min-width: 0;
+  /* lets the pill row below shrink+scroll instead of overflowing the page */
 }
 
 .pill-scroll-btn {
@@ -478,10 +474,7 @@
   overflow-x: auto;
   scrollbar-width: none;
   flex: 1;
-  min-width: 0; /* the actual fix: without this the flex item refuses to shrink
-                   below its content width, so overflow-x:auto never kicks in
-                   and the row (plus everything after it) pushes past the
-                   viewport edge instead of scrolling internally */
+  min-width: 0;
 }
 
 .category-filter::-webkit-scrollbar {
@@ -530,6 +523,10 @@
   transition: all 0.5s ease-in-out;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-auto-rows: min-content;
+  /* rows size to content, not the tallest sibling */
+  align-items: start;
+  /* stops cards from stretching to fill the row */
   gap: 28px;
   animation: fadeIn 0.6s ease;
   padding-bottom: 20px;
@@ -545,6 +542,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -677,6 +675,21 @@
   }
 }
 
+/* ==========================================================
+   Responsive — Mobile
+   ========================================================== */
+
+/* Keeps any image inside a grid card from stretching tall on
+   narrow mobile columns, no matter how the card component
+   itself is styled. */
+.product-grid img {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  /* adjust to match your actual product photo ratio */
+  object-fit: cover;
+  display: block;
+}
+
 @media (max-width: 900px) {
   .shop-layout {
     grid-template-columns: minmax(0, 1fr);
@@ -711,7 +724,9 @@
 
   .product-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 18px;
+    grid-auto-rows: min-content;
+    align-items: start;
+    gap: 12px;
   }
 
   .no-products {
@@ -726,6 +741,10 @@
 
   .search-bar {
     width: 100%;
+  }
+
+  .product-image-container {
+    height: 170px;
   }
 }
 
@@ -759,6 +778,8 @@
 
   .product-grid {
     grid-template-columns: 1fr 1fr;
+    grid-auto-rows: min-content;
+    align-items: start;
     gap: 10px;
   }
 

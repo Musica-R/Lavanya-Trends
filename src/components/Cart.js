@@ -15,12 +15,11 @@ const Cart = () => {
 
   const navigate = useNavigate();
 
-  // Handle Checkout button click
   const handleCheckout = () => {
     const user = localStorage.getItem("user");
 
     if (!user) {
-      toggleCart(); // Close cart before navigating
+      toggleCart();
       navigate("/login", {
         state: { from: "/addtocart" },
       });
@@ -33,14 +32,9 @@ const Cart = () => {
 
   return (
     <>
-      {/* Overlay */}
-      {isCartOpen && (
-        <div className="cart-overlay" onClick={toggleCart}></div>
-      )}
+      {isCartOpen && <div className="cart-overlay" onClick={toggleCart}></div>}
 
-      {/* Cart Sidebar */}
       <div className={`cart-sidebar ${isCartOpen ? "open" : ""}`}>
-        {/* Cart Header */}
         <div className="cart-header">
           <h2 className="cart-title">View Cart</h2>
           <button className="close-cart-btn" onClick={toggleCart}>
@@ -48,7 +42,6 @@ const Cart = () => {
           </button>
         </div>
 
-        {/* Cart Items */}
         <div className="cart-items">
           {cartItems.length === 0 ? (
             <div className="empty-cart">
@@ -56,10 +49,7 @@ const Cart = () => {
               <p>Your cart is empty</p>
 
               <Link to="/product">
-                <button
-                  className="continue-shopping-btn"
-                  onClick={toggleCart}
-                >
+                <button className="continue-shopping-btn" onClick={toggleCart}>
                   Continue Shopping
                 </button>
               </Link>
@@ -67,7 +57,6 @@ const Cart = () => {
           ) : (
             cartItems.map((item) => (
               <div key={item._id} className="cart-item">
-                {/* Image */}
                 <div className="cart-item-image-container">
                   <img
                     src={item.image}
@@ -81,20 +70,15 @@ const Cart = () => {
                   />
                 </div>
 
-                {/* Details */}
                 <div className="cart-item-details">
                   <h4 className="cart-item-name">{item.name}</h4>
-                  <p className="cart-item-price">${item.price}</p>
+                  <p className="cart-item-price">₹{item.price}</p>
 
-                  {/* Quantity */}
                   <div className="quantity-controls">
                     <button
                       className="quantity-btn"
                       onClick={() =>
-                        updateQuantity(
-                          item._id,
-                          Math.max(1, item.quantity - 1)
-                        )
+                        updateQuantity(item._id, Math.max(1, item.quantity - 1))
                       }
                     >
                       -
@@ -104,16 +88,13 @@ const Cart = () => {
 
                     <button
                       className="quantity-btn"
-                      onClick={() =>
-                        updateQuantity(item._id, item.quantity + 1)
-                      }
+                      onClick={() => updateQuantity(item._id, item.quantity + 1)}
                     >
                       +
                     </button>
                   </div>
                 </div>
 
-                {/* Remove */}
                 <button
                   className="remove-item-btn"
                   onClick={() => removeFromCart(item._id)}
@@ -125,20 +106,14 @@ const Cart = () => {
           )}
         </div>
 
-        {/* Cart Footer */}
         {cartItems.length > 0 && (
           <div className="cart-footer">
             <div className="cart-total">
               <span>Total:</span>
-              <span className="total-amount">
-                ${getCartTotal().toFixed(2)}
-              </span>
+              <span className="total-amount">₹{getCartTotal().toFixed(2)}</span>
             </div>
 
-            <button
-              className="checkout-btn"
-              onClick={handleCheckout}
-            >
+            <button className="checkout-btn" onClick={handleCheckout}>
               Proceed to Checkout
             </button>
           </div>

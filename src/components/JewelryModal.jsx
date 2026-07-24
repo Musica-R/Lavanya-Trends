@@ -8,6 +8,11 @@ const JewelryModal = ({ product, onClose }) => {
 
     if (!product) return null;
 
+    const firstAttribute = product.attributes?.[0];
+    const image = firstAttribute?.image_url || product.image_url || product.image;
+    const price = parseFloat(product.offerPrice || product.price) || 0;
+    const categoryLabel = product.category?.category || product.category || "";
+
     const handleAddToCart = () => {
         addToCart(product, quantity);
         onClose();
@@ -16,7 +21,6 @@ const JewelryModal = ({ product, onClose }) => {
     return (
         <div className="modal-overlay" onClick={onClose}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                {/* Close Button */}
                 <button className="modal-close-btn" onClick={onClose}>
                     ✕
                 </button>
@@ -25,7 +29,7 @@ const JewelryModal = ({ product, onClose }) => {
                     {/* Product Image */}
                     <div className="modal-image-container">
                         <img
-                            src={product.image}
+                            src={image}
                             alt={product.name}
                             className="modal-image"
                             width={400}
@@ -36,7 +40,7 @@ const JewelryModal = ({ product, onClose }) => {
 
                     {/* Product Details */}
                     <div className="modal-details">
-                        <span className="modal-category">{product.category}</span>
+                        <span className="modal-category">{categoryLabel}</span>
                         <h2 className="modal-title">{product.name}</h2>
 
                         {/* Rating */}
@@ -44,16 +48,16 @@ const JewelryModal = ({ product, onClose }) => {
                             {[...Array(5)].map((_, index) => (
                                 <span
                                     key={index}
-                                    className={index < Math.floor(product.rating) ? "star filled" : "star"}> ⭐ </span>
+                                    className={index < Math.floor(product.rating || 0) ? "star filled" : "star"}> ⭐ </span>
                             ))}
-                            <span className="rating-number">({product.rating.toFixed(1)})</span>
+                            <span className="rating-number">({(product.rating || 0).toFixed(1)})</span>
                         </div>
 
                         {/* Description */}
                         <p className="modal-description">{product.desc}</p>
 
                         {/* Price */}
-                        <div className="modal-price">₹ {product.price.toFixed(2)}</div>
+                        <div className="modal-price">₹ {price.toFixed(2)}</div>
 
                         {/* Quantity Selector */}
                         <div className="modal-quantity">
@@ -74,7 +78,7 @@ const JewelryModal = ({ product, onClose }) => {
 
                         {/* Add to Cart Button */}
                         <button className="modal-add-to-cart" onClick={handleAddToCart}>
-                            Add to Cart - ₹ {(product.price * quantity).toFixed(2)}
+                            Add to Cart - ₹ {(price * quantity).toFixed(2)}
                         </button>
                     </div>
                 </div>

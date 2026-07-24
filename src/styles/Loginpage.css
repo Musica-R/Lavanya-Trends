@@ -341,6 +341,9 @@
 }
 
 @media (max-width: 500px) {
+  .lav-auth-right {
+    padding: 24px 14px;
+  }
   .lav-login-card {
     width: 100%;
     padding: 32px 22px;
@@ -348,5 +351,114 @@
   .lav-card-logo-circle {
     width: 48px;
     height: 48px;
+  }
+  .lav-card-title {
+    font-size: 23px;
+  }
+}
+
+/* ---------------- Small phones (≤360px, incl. 320px) ---------------- */
+@media (max-width: 360px) {
+  .lav-auth-page {
+    display: block; /* avoid flex-shrink rounding issues on very narrow viewports */
+  }
+
+  .lav-auth-right {
+    padding: 18px 10px;
+    min-height: 100vh;
+  }
+
+  .lav-login-card {
+    padding: 26px 16px 22px;
+    border-radius: 14px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  }
+
+  .lav-card-logo-row {
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .lav-card-logo-line {
+    max-width: 36px;
+  }
+
+  .lav-card-logo-circle {
+    width: 42px;
+    height: 42px;
+    border-width: 2px;
+  }
+
+  .lav-card-title {
+    font-size: 20px;
+    margin-bottom: 4px;
+  }
+
+  .lav-card-subtitle {
+    font-size: 12.5px;
+    margin-bottom: 20px;
+  }
+
+  .lav-input-group {
+    margin-bottom: 12px;
+    border-radius: 10px;
+  }
+
+  .lav-input-icon {
+    width: 38px;
+  }
+
+  .lav-input-icon svg,
+  .lav-input-eye svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .lav-input-group input {
+    /* 16px prevents iOS Safari auto-zoom on focus */
+    font-size: 16px;
+    padding: 11px 8px 11px 0;
+  }
+
+  .lav-input-eye {
+    padding: 0 10px;
+  }
+
+  .lav-forgot-row {
+    margin: -4px 0 14px;
+  }
+
+  .lav-forgot-link {
+    font-size: 12px;
+  }
+
+  .lav-submit-btn {
+    padding: 11px;
+    font-size: 14.5px;
+    border-radius: 10px;
+  }
+
+  .lav-or-divider {
+    margin: 20px 0 14px;
+    font-size: 12px;
+  }
+
+  /* Stack social buttons instead of squeezing them side by side */
+  .lav-social-row {
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .lav-social-btn {
+    padding: 10px;
+    font-size: 13px;
+  }
+
+  .lav-login-toggle-text {
+    font-size: 12.5px;
+  }
+  .lav-input-eye {
+    display: none;
   }
 }

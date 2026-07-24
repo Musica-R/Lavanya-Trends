@@ -12,9 +12,6 @@ const formatINR = (value) =>
 const ProductModal = ({ product, onClose }) => {
   const { addToCart } = useCart();
 
-  // Kept as local state (rather than reading `product` directly) so that
-  // clicking a "You Might Also Like" card can swap the modal's content
-  // in place, without needing the parent to re-open a new modal.
   const [currentProduct, setCurrentProduct] = useState(product);
   const [quantity, setQuantity] = useState(1);
   const [activeAttrIndex, setActiveAttrIndex] = useState(0);
@@ -22,15 +19,12 @@ const ProductModal = ({ product, onClose }) => {
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [relatedLoading, setRelatedLoading] = useState(false);
 
-  // Reset local view whenever a different product is opened.
   useEffect(() => {
     setCurrentProduct(product);
     setQuantity(1);
     setActiveAttrIndex(0);
   }, [product]);
 
-  // Fetch 5 random sarees (never gold/jewelry, never the current product)
-  // for the "You Might Also Like" strip below the details.
   useEffect(() => {
     if (!currentProduct) return;
 
@@ -49,7 +43,6 @@ const ProductModal = ({ product, onClose }) => {
             )
           : [];
 
-        // Shuffle and take 5.
         const shuffled = [...pool].sort(() => Math.random() - 0.5);
         if (!cancelled) setRelatedProducts(shuffled.slice(0, 5));
       } catch (err) {
@@ -67,7 +60,6 @@ const ProductModal = ({ product, onClose }) => {
   }, [currentProduct]);
 
   const attributes = currentProduct?.attributes || [];
-  // Up to 3 color/image variants, shown as thumbnails under the main image.
   const thumbnails = useMemo(() => attributes.slice(0, 3), [attributes]);
 
   const activeAttribute = attributes[activeAttrIndex] || attributes[0];
@@ -79,8 +71,10 @@ const ProductModal = ({ product, onClose }) => {
   const offerPrice = currentProduct.offerPrice ? parseFloat(currentProduct.offerPrice) : null;
   const hasDiscount = offerPrice !== null && offerPrice < price;
 
+  // ✅ FIX: pass the selected attribute (color variant) into addToCart
+  // so the cart item carries a real attributeId instead of null.
   const handleAddToCart = () => {
-    addToCart(currentProduct, quantity);
+    addToCart(currentProduct, quantity, activeAttribute);
     onClose();
   };
 
@@ -91,13 +85,11 @@ const ProductModal = ({ product, onClose }) => {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        {/* Close Button */}
         <button className="modal-close-btn" onClick={onClose}>
           ✕
         </button>
 
         <div className="modal-body">
-          {/* Product Image */}
           <div>
             <div className="modal-image-container">
               <img
@@ -126,12 +118,10 @@ const ProductModal = ({ product, onClose }) => {
             )}
           </div>
 
-          {/* Product Details */}
           <div className="modal-details">
             <span className="modal-category">{currentProduct.category?.category}</span>
             <h2 className="modal-title">{currentProduct.name}</h2>
 
-            {/* Rating */}
             <div className="modal-rating">
               {[...Array(5)].map((_, index) => (
                 <span
@@ -151,16 +141,13 @@ const ProductModal = ({ product, onClose }) => {
               </p>
             )}
 
-            {/* Description */}
             <p className="modal-description">{currentProduct.desc}</p>
 
-            {/* Price */}
             <div className="modal-price-row">
               <span className="modal-price">{formatINR(hasDiscount ? offerPrice : price)}</span>
               {hasDiscount && <span className="modal-price-original">{formatINR(price)}</span>}
             </div>
 
-            {/* Quantity Selector */}
             <div className="modal-quantity">
               <label>Quantity:</label>
               <div className="quantity-selector">
@@ -174,14 +161,12 @@ const ProductModal = ({ product, onClose }) => {
               </div>
             </div>
 
-            {/* Add to Cart Button */}
             <button className="modal-add-to-cart" onClick={handleAddToCart}>
               Add to Cart - {formatINR((hasDiscount ? offerPrice : price) * quantity)}
             </button>
           </div>
         </div>
 
-        {/* You Might Also Like */}
         {(relatedLoading || relatedProducts.length > 0) && (
           <div className="modal-related">
             <h3 className="modal-related-title">You Might Also Like</h3>

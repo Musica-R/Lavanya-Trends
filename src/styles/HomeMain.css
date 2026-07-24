@@ -426,18 +426,37 @@
   }
 
   .category-section {
-    padding: 48px 16px 56px;
+    padding: 48px 0px 56px;
   }
 
   .category-title {
     font-size: 28px;
   }
 
+  /* Straight horizontal scrolling row instead of wrapping grid */
+  .category-heading {
+    padding: 0 16px;
+  }
+
   .category-grid {
-    gap: 20px 16px;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+    gap: 20px;
+    padding: 4px 16px 16px;
+    margin: 0;
+    scrollbar-width: none; /* firefox */
+  }
+
+  .category-grid::-webkit-scrollbar {
+    display: none; /* chrome/safari */
   }
 
   .category-item {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
     width: 96px;
   }
 
@@ -456,43 +475,79 @@
 ========================= */
 @media (max-width: 480px) {
 
+  /* Taller frame + object-position tuned so the FULL saree drape
+     (head to hem) stays visible instead of being cropped */
   .main-hero,
   .hero-bg-slider,
   .main-swiper,
   .main-slide {
-    min-height: 62vh;
+    min-height: 88vh;
+  }
+
+  .main-slide img {
+    object-fit: cover;
+    object-position: center top;
+  }
+
+  .main-hero-container {
+    padding: 0 16px;
+    align-items: flex-end;
+    padding-bottom: 28px;
+  }
+
+  .main-hero-text {
+    gap: 10px;
+    max-width: 100%;
+  }
+
+  /* Small, soft gradient just behind the text block so the saree
+     photo itself stays fully visible above it */
+  .hero-overlay {
+    background: linear-gradient(
+      180deg,
+      rgba(20, 4, 10, 0) 0%,
+      rgba(20, 4, 10, 0) 55%,
+      rgba(20, 4, 10, 0.55) 78%,
+      rgba(20, 4, 10, 0.82) 100%
+    );
   }
 
   .hero-badge {
-    font-size: 12px;
-    padding: 6px 14px;
+    font-size: 10.5px;
+    padding: 5px 12px;
   }
 
   .main-hero-title {
-    font-size: 24px;
-    line-height: 1.35;
+    font-size: 20px;
+    line-height: 1.3;
+    letter-spacing: 0.4px;
+  }
+
+  .hero-divider {
+    max-width: 200px;
   }
 
   .main-hero-desc {
-    font-size: 14px;
+    font-size: 12.5px;
+    line-height: 1.4;
   }
 
   .main-hero-actions {
-    flex-direction: column;
-    gap: 12px;
+    flex-direction: row;
+    gap: 10px;
     width: 100%;
   }
 
   .btn-primary,
   .btn-secondary {
-    width: 100%;
+    flex: 1;
     text-align: center;
-    padding: 14px;
-    font-size: 14px;
+    padding: 10px 8px;
+    font-size: 12px;
   }
 
   .hero-trust {
-    font-size: 11px;
+    font-size: 10px;
   }
 
   .btn-primary:hover,
@@ -501,25 +556,51 @@
   }
 
   .hero-nav {
-    width: 32px;
-    height: 32px;
+    width: 30px;
+    height: 30px;
+    top: 44%;
+  }
+
+  .swiper-pagination-bullet {
+    width: 6px;
+    height: 6px;
+  }
+
+  /* Category section: compact straight-line horizontal scroller,
+     swipeable with a finger like a small carousel */
+  .category-section {
+    padding: 26px 0 0px;
+  }
+
+  .category-eyebrow {
+    font-size: 11px;
+  }
+
+  .category-title {
+    font-size: 21px;
+  }
+
+  .category-subtitle {
+    font-size: 12.5px;
+    padding: 0 20px;
   }
 
   .category-grid {
-    gap: 18px 14px;
+    gap: 14px;
+    padding: 4px 14px 12px;
   }
 
   .category-item {
-    width: 78px;
+    width: 76px;
   }
 
   .category-circle {
-    width: 72px;
-    height: 72px;
+    width: 70px;
+    height: 70px;
     padding: 3px;
   }
 
   .category-label {
-    font-size: 11px;
+    font-size: 10.5px;
   }
 }

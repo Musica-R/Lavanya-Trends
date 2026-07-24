@@ -195,7 +195,7 @@ const HomeProduct = () => {
                     className="product-image"
                   />
                   <div className="hover-overlay">
-                    <Link to={`/product/${product.id}`}>
+                    <Link to={`/product`}>
                       <button className="view-product-btn">View Product</button>
                     </Link>
                   </div>

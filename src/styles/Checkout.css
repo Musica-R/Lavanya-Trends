@@ -1,7 +1,7 @@
 .checkout-container {
     max-width: 1100px;
     margin: auto;
-    padding: 80px 20px;
+    padding: 60px 20px;
 }
 
 .checkout-title {
@@ -13,74 +13,30 @@
     letter-spacing: 1px;
     color: #8b1e3f;
 }
-/* .cod{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-} */
+
 .checkout-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 30px;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 24px;
+    align-items: start;
 }
 
-.checkout-cart,
-.checkout-form {
+.checkout-form,
+.checkout-summary {
     background: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
 }
 
-.checkout-cart h3,
-.checkout-form h3 {
-    margin-bottom: 15px;
-    font-family: "Playfair Display", serif;
-    font-style: italic;
-    letter-spacing: 1px;
-    color: #8b1e3f;
+.checkout-summary {
+    position: sticky;
+    top: 24px;
 }
 
-.checkout-item {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 15px;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 10px;
-}
-
-.checkout-image {
-    border-radius: 6px;
-    object-fit: cover;
-}
-
-.checkout-item-info {
-    flex: 1;
-    font-family: "Playfair Display", serif;
-    font-style: italic;
-    letter-spacing: 1px;
-    color: #8b1e3f;
-}
-
-.item-name {
-    font-weight: 600;
-}
-
-.item-subtotal {
-    font-weight: bold;
-    font-family: "Playfair Display", serif;
-    font-style: italic;
-    letter-spacing: 1px;
-    color: #8b1e3f;
-
-}
-
-.checkout-total {
-    text-align: right;
-    font-size: 18px;
-    font-weight: bold;
-    margin-top: 15px;
+.checkout-form h4,
+.checkout-summary h4 {
+    margin-bottom: 14px;
     font-family: "Playfair Display", serif;
     font-style: italic;
     letter-spacing: 1px;
@@ -95,6 +51,48 @@
     border: 1px solid #ddd;
     border-radius: 6px;
     font-size: 14px;
+    font-family: inherit;
+}
+
+.checkout-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.checkout-row input {
+    margin-bottom: 12px;
+}
+
+.payment-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.payment-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 12px;
+    cursor: pointer;
+}
+
+.payment-option input {
+    width: auto;
+    margin: 0;
+}
+
+.checkout-error {
+    color: #b3261e;
+    background: #fdecea;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    margin-bottom: 12px;
 }
 
 .whatsapp-btn {
@@ -106,96 +104,150 @@
     border: none;
     border-radius: 8px;
     cursor: pointer;
+    margin-top: 8px;
+    transition: background 0.2s ease;
 }
 
-.whatsapp-btn:hover {
+.whatsapp-btn:hover:not(:disabled) {
     background: #b32e56;
-    color: #fff;
 }
 
+.whatsapp-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.whatsapp-btn.paid {
+    background: #2e7d32;
+}
+
+.whatsapp-btn.paid:hover:not(:disabled) {
+    background: #388e3c;
+}
+
+/* Order Summary */
+.summary-items {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    max-height: 340px;
+    overflow-y: auto;
+    margin-bottom: 14px;
+}
+
+.summary-item {
+    display: grid;
+    grid-template-columns: 56px 1fr auto;
+    gap: 12px;
+    align-items: center;
+}
+
+.summary-image {
+    width: 56px;
+    height: 70px;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.summary-item-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+}
+
+.summary-item-qty {
+    font-size: 13px;
+    color: #777;
+}
+
+.summary-item-subtotal {
+    font-size: 14px;
+    font-weight: 600;
+    color: #8b1e3f;
+    white-space: nowrap;
+}
+
+.summary-divider {
+    height: 1px;
+    background: #eee;
+    margin: 12px 0;
+}
+
+.summary-line {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 6px;
+}
+
+.summary-total {
+    display: flex;
+    justify-content: space-between;
+    font-size: 18px;
+    font-weight: bold;
+    font-family: "Playfair Display", serif;
+    font-style: italic;
+    color: #8b1e3f;
+}
+
+/* Tablet */
 @media (max-width: 1024px) {
     .checkout-container {
-        padding: 60px 16px;
+        padding: 50px 16px;
     }
-
     .checkout-grid {
-        gap: 20px;
+        gap: 18px;
     }
-
     .checkout-title {
         font-size: 26px;
     }
 }
 
-
+/* Mobile - stack, summary on top, sticky removed */
 @media (max-width: 768px) {
     .checkout-grid {
         grid-template-columns: 1fr;
-        /* Stack cart & form */
     }
-
-    .checkout-cart,
-    .checkout-form {
+    .checkout-summary {
+        position: static;
+        order: -1;
+    }
+    .checkout-form,
+    .checkout-summary {
         padding: 18px;
     }
-
     .checkout-title {
         font-size: 24px;
     }
-
-    .checkout-item {
-        gap: 12px;
-    }
-
-    .checkout-total {
-        font-size: 17px;
-    }
 }
 
-
+/* Small phones - perfected spacing */
 @media (max-width: 420px) {
     .checkout-container {
-        padding: 90px 12px;
+        padding: 70px 12px;
     }
-
     .checkout-title {
-        font-size: 22px;
-        margin-bottom: 20px;
+        font-size: 21px;
+        margin-bottom: 18px;
     }
-
-    .checkout-cart h3,
-    .checkout-form h3 {
-        font-size: 18px;
+    .checkout-form h4,
+    .checkout-summary h4 {
+        font-size: 17px;
     }
-
-    .checkout-item {
-        flex-direction: column;
-        align-items: flex-start;
+    .checkout-row {
+        grid-template-columns: 1fr;
     }
-
-    .checkout-image {
-        width: 100%;
-        height: auto;
+    .summary-image {
+        width: 48px;
+        height: 60px;
     }
-
-    .item-name {
-        font-size: 15px;
+    .summary-item-name {
+        font-size: 13px;
     }
-
-    .item-subtotal {
-        font-size: 14px;
-    }
-
-    .checkout-total {
+    .summary-total {
         font-size: 16px;
     }
-
-    .checkout-form input,
-    .checkout-form textarea {
-        font-size: 14px;
-        padding: 10px;
-    }
-
     .whatsapp-btn {
         padding: 12px;
         font-size: 15px;

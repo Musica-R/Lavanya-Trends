@@ -13,8 +13,6 @@ const PRICE_PRESETS = [
 
 const API_URL = process.env.REACT_APP_API_URL;
 
-
-
 const SORT_OPTIONS = [
   { value: "popularity", label: "Popularity" },
   { value: "newest", label: "Newest First" },
@@ -26,11 +24,6 @@ const SORT_OPTIONS = [
 const CATEGORY_VISIBLE_LIMIT = 6;
 const PAGE_SIZE = 16;
 
-// Categories that should never appear in the saree shop (e.g. jewelry).
-// Backend still returns these in the product list, so we filter them
-// out here rather than relying on the API to drop them.
-const EXCLUDED_CATEGORIES = ["gold"];
-
 // The API doesn't return a rating field yet, but ProductCard reads
 // product.rating to fill stars. This derives a stable per-product
 // rating (won't reshuffle on re-render) so the card shows real stars
@@ -39,11 +32,6 @@ const withRating = (product) => {
   if (product.rating) return product;
   const rating = 3.9 + ((product.id * 7) % 11) / 10; // 3.9 - 4.9
   return { ...product, rating: Math.min(rating, 5) };
-};
-
-const isExcludedCategory = (product) => {
-  const name = product.category?.category?.toLowerCase() || "";
-  return EXCLUDED_CATEGORIES.includes(name);
 };
 
 const ProductGrid = ({ onViewDetails }) => {
@@ -77,7 +65,7 @@ const ProductGrid = ({ onViewDetails }) => {
 
   const pillsRef = useRef(null);
 
-  // Fetch the full product list once. Filtering + pagination below are
+  // Fetch the full saree list once. Filtering + pagination below are
   // handled entirely on the client so the sidebar filters, price range
   // and the 16-per-page grid all work off the same data set.
   useEffect(() => {
@@ -86,7 +74,7 @@ const ProductGrid = ({ onViewDetails }) => {
         setLoading(true);
         setError("");
 
-        const res = await fetch(`${API_URL}/products/get-products`);
+        const res = await fetch(`${API_URL}/products/get-sarees`);
         if (!res.ok) throw new Error("API response not OK");
 
         const data = await res.json();
@@ -109,36 +97,32 @@ const ProductGrid = ({ onViewDetails }) => {
     fetchProducts();
   }, []);
 
-  // Sarees only — jewelry/gold products are dropped everywhere: filters,
-  // colors, pills, and the grid itself.
-  const sareeProducts = useMemo(
-    () => products.filter((p) => !isExcludedCategory(p)),
-    [products]
-  );
-
+  // NOTE: the category object's field is `name` (not `category`) —
+  // { id, name, collection } — so every lookup below reads
+  // product.category?.name.
   const categories = useMemo(
-    () => ["All", ...new Set(sareeProducts.map((p) => p.category?.category).filter(Boolean))],
-    [sareeProducts]
+    () => ["All", ...new Set(products.map((p) => p.category?.name).filter(Boolean))],
+    [products]
   );
 
   // Subcategories only make sense once a category is picked, so this
   // list (and the sidebar block for it) stays empty on "All".
   const subcategories = useMemo(() => {
     if (selectedCategory === "All") return [];
-    const pool = sareeProducts.filter((p) => p.category?.category === selectedCategory);
+    const pool = products.filter((p) => p.category?.name === selectedCategory);
     return [...new Set(pool.map((p) => p.subcategory?.name).filter(Boolean))];
-  }, [sareeProducts, selectedCategory]);
+  }, [products, selectedCategory]);
 
   // Colors only make sense once a subcategory is picked.
   const colors = useMemo(() => {
     if (selectedSubcategory === "All") return [];
-    const pool = sareeProducts.filter(
+    const pool = products.filter(
       (p) =>
-        p.category?.category === selectedCategory && p.subcategory?.name === selectedSubcategory
+        p.category?.name === selectedCategory && p.subcategory?.name === selectedSubcategory
     );
     const all = pool.flatMap((p) => (p.attributes || []).map((a) => a.color).filter(Boolean));
     return [...new Set(all)];
-  }, [sareeProducts, selectedCategory, selectedSubcategory]);
+  }, [products, selectedCategory, selectedSubcategory]);
 
   const visibleSidebarCategories = showAllCategories
     ? categories
@@ -238,15 +222,15 @@ const ProductGrid = ({ onViewDetails }) => {
   };
 
   const filteredProducts = useMemo(() => {
-    let list = sareeProducts.filter((product) => {
+    let list = products.filter((product) => {
       const name = product.name?.toLowerCase() || "";
       const desc = product.desc?.toLowerCase() || "";
-      const category = product.category?.category?.toLowerCase() || "";
+      const category = product.category?.name?.toLowerCase() || "";
       const search = searchTerm?.toLowerCase() || "";
       const price = parseFloat(product.offerPrice || product.price) || 0;
 
       const matchCategory =
-        selectedCategory === "All" || product.category?.category === selectedCategory;
+        selectedCategory === "All" || product.category?.name === selectedCategory;
 
       const matchSubcategory =
         selectedSubcategory === "All" || product.subcategory?.name === selectedSubcategory;
@@ -301,7 +285,7 @@ const ProductGrid = ({ onViewDetails }) => {
 
     return list.map(withRating);
   }, [
-    sareeProducts,
+    products,
     selectedCategory,
     selectedSubcategory,
     selectedColor,
