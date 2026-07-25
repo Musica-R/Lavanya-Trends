@@ -11,7 +11,7 @@ const PRICE_PRESETS = [
   { label: "Above ₹5999", min: 5999, max: Infinity },
 ];
 
-const API_URL = process.env.REACT_APP_API_URL;
+const API_URL = process.env.REACT_APP_API_URL || "https://sarees-backend-9wq0.onrender.com";
 
 const SORT_OPTIONS = [
   { value: "popularity", label: "Popularity" },
@@ -22,7 +22,7 @@ const SORT_OPTIONS = [
 ];
 
 const CATEGORY_VISIBLE_LIMIT = 6;
-const PAGE_SIZE = 16;
+const PAGE_SIZE = 12;
 
 // The API doesn't return a rating field yet, but ProductCard reads
 // product.rating to fill stars. This derives a stable per-product
@@ -42,6 +42,10 @@ const ProductGrid = ({ onViewDetails }) => {
   const [error, setError] = useState("");
 
   const [page, setPage] = useState(1);
+  // Server-reported pagination info (falls back gracefully if the API
+  // doesn't send these fields under these exact names).
+  const [totalCount, setTotalCount] = useState(0);
+  const [totalPagesFromApi, setTotalPagesFromApi] = useState(1);
 
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedSubcategory, setSelectedSubcategory] = useState("All");
@@ -51,8 +55,10 @@ const ProductGrid = ({ onViewDetails }) => {
   const [showAllCategories, setShowAllCategories] = useState(false);
   const [fabricOpen, setFabricOpen] = useState(false);
 
-  const [priceMin, setPriceMin] = useState(499);
-  const [priceMax, setPriceMax] = useState(12999);
+  // No price filter is active until the user picks a preset or applies
+  // a custom range — so every product shows by default, regardless of
+  // price. `priceRange` is null = "show everything".
+  const [priceRange, setPriceRange] = useState(null);
   const [activePreset, setActivePreset] = useState(null);
 
   // Custom min/max entry fields — user must enter Min first, and Max
@@ -65,16 +71,17 @@ const ProductGrid = ({ onViewDetails }) => {
 
   const pillsRef = useRef(null);
 
-  // Fetch the full saree list once. Filtering + pagination below are
-  // handled entirely on the client so the sidebar filters, price range
-  // and the 16-per-page grid all work off the same data set.
+  // Fetch one page of sarees at a time from the API using page + limit
+  // query params. Runs again whenever `page` changes.
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
         setError("");
 
-        const res = await fetch(`${API_URL}/products/get-sarees`);
+        const res = await fetch(
+          `${API_URL}/products/get-sarees?page=${page}&limit=${PAGE_SIZE}`
+        );
         if (!res.ok) throw new Error("API response not OK");
 
         const data = await res.json();
@@ -85,21 +92,36 @@ const ProductGrid = ({ onViewDetails }) => {
           : [];
 
         setProducts(activeProducts);
+
+        // Try to read pagination metadata from common response shapes.
+        const apiTotal =
+          data.total ?? data.totalCount ?? data.count ?? activeProducts.length;
+        const apiTotalPages =
+          data.totalPages ??
+          data.pages ??
+          Math.max(1, Math.ceil(apiTotal / PAGE_SIZE));
+
+        setTotalCount(apiTotal);
+        setTotalPagesFromApi(apiTotalPages);
       } catch (err) {
         console.error("Failed to fetch products:", err);
         setError("Unable to load products. Please try again later.");
         setProducts([]);
+        setTotalCount(0);
+        setTotalPagesFromApi(1);
       } finally {
         setLoading(false);
       }
     };
 
     fetchProducts();
-  }, []);
+  }, [page]);
 
   // NOTE: the category object's field is `name` (not `category`) —
   // { id, name, collection } — so every lookup below reads
   // product.category?.name.
+  // NOTE: since `products` now only holds the current page's items,
+  // these facet lists only reflect what's on the current page.
   const categories = useMemo(
     () => ["All", ...new Set(products.map((p) => p.category?.name).filter(Boolean))],
     [products]
@@ -158,14 +180,14 @@ const ProductGrid = ({ onViewDetails }) => {
     setMaxInput("");
     setPriceError("");
     if (activePreset?.label === preset.label) {
+      // Toggling the same preset off removes the price filter entirely
+      // — back to showing everything.
       setActivePreset(null);
-      setPriceMin(499);
-      setPriceMax(12999);
+      setPriceRange(null);
       return;
     }
     setActivePreset(preset);
-    setPriceMin(preset.min);
-    setPriceMax(preset.max === Infinity ? 12999 : preset.max);
+    setPriceRange({ min: preset.min, max: preset.max });
     setPage(1);
   };
 
@@ -195,8 +217,7 @@ const ProductGrid = ({ onViewDetails }) => {
 
     setPriceError("");
     setActivePreset(null);
-    setPriceMin(min);
-    setPriceMax(max);
+    setPriceRange({ min, max });
     setPage(1);
   };
 
@@ -205,8 +226,7 @@ const ProductGrid = ({ onViewDetails }) => {
     setSelectedSubcategory("All");
     setSelectedColor("All");
     setSelectedFabrics([]);
-    setPriceMin(499);
-    setPriceMax(12999);
+    setPriceRange(null);
     setActivePreset(null);
     setMinInput("");
     setMaxInput("");
@@ -221,6 +241,9 @@ const ProductGrid = ({ onViewDetails }) => {
     pillsRef.current.scrollBy({ left: dir * 200, behavior: "smooth" });
   };
 
+  // Filtering/sorting now only operates on the current page's fetched
+  // products (server-side pagination handles the "which 12 products"
+  // part; this just refines what's shown from that batch).
   const filteredProducts = useMemo(() => {
     let list = products.filter((product) => {
       const name = product.name?.toLowerCase() || "";
@@ -248,7 +271,9 @@ const ProductGrid = ({ onViewDetails }) => {
       const matchSearch =
         !search || name.includes(search) || category.includes(search) || desc.includes(search);
 
-      const matchPrice = price >= priceMin && price <= priceMax;
+      // No price filter selected yet → every product passes.
+      const matchPrice =
+        !priceRange || (price >= priceRange.min && price <= priceRange.max);
 
       return (
         matchCategory &&
@@ -291,19 +316,16 @@ const ProductGrid = ({ onViewDetails }) => {
     selectedColor,
     selectedFabrics,
     searchTerm,
-    priceMin,
-    priceMax,
+    priceRange,
     sortBy,
   ]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / PAGE_SIZE));
+  // Pagination is now driven by the API's reported total pages, not a
+  // local slice of a full product array.
+  const totalPages = Math.max(1, totalPagesFromApi);
   const currentPage = Math.min(page, totalPages);
-  const paginatedProducts = filteredProducts.slice(
-    (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE
-  );
 
-  const total = filteredProducts.length;
+  const total = totalCount;
   const rangeStart = total === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
   const rangeEnd = Math.min(currentPage * PAGE_SIZE, total);
 
@@ -521,7 +543,7 @@ const ProductGrid = ({ onViewDetails }) => {
             ) : (
               <>
                 <div className="product-grid show">
-                  {paginatedProducts.map((product) => (
+                  {filteredProducts.map((product) => (
                     // Double-click opens the full product modal.
                     <div key={product.id} onDoubleClick={() => onViewDetails(product)}>
                       <ProductCard product={product} onViewDetails={onViewDetails} />

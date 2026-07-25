@@ -30,10 +30,14 @@ const ProductCard = ({ product, onViewDetails }) => {
     const [loaded, setLoaded] = useState(false);
     const [imgSrc, setImgSrc] = useState(() => getProductImage(product));
 
-    const price = product.price;
+    // API sends price/offerPrice as strings (e.g. "800.00"), so parse
+    // them to numbers before doing any math with them.
+    const mrp = parseFloat(product.price) || 0;
+    const sellingPrice = parseFloat(product.offerPrice ?? product.price) || 0;
     const discount = product.discount || 0;
-    const originalPrice =
-        discount > 0 ? Math.round(price + (price * discount) / 100) : price;
+    // Only show the strikethrough MRP when it's actually higher than
+    // the selling price — otherwise there's nothing to "discount" from.
+    const hasDiscount = discount > 0 && mrp > sellingPrice;
 
     // If the API-provided URL turns out broken (404, mixed-content
     // block, etc.), swap to the fallback exactly once.
@@ -85,10 +89,10 @@ const ProductCard = ({ product, onViewDetails }) => {
 
                 {/* Price and Add to Cart */}
                 <div className="product-footer">
-                    <span className="product-price">₹ {price}</span>
-                    {discount > 0 && (
+                    <span className="product-price">₹ {sellingPrice}</span>
+                    {hasDiscount && (
                         <>
-                            <p className='grey'>{originalPrice}</p>
+                            <p className='grey'>₹ {mrp}</p>
                             <p className='red'>{discount}% OFF</p>
                         </>
                     )}

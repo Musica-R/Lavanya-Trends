@@ -5,8 +5,8 @@ import "../styles/JewelryGrid.css";
 import Loader from "./Loader";
 
 // Jewelry runs at a very different price scale than sarees (₹20k–₹1L+),
-// so these presets/defaults are jewelry-specific — do not reuse the
-// saree grid's ₹999-scale values here.
+// so these presets are jewelry-specific — do not reuse the saree
+// grid's ₹999-scale values here.
 const PRICE_PRESETS = [
   { label: "Under ₹25,000", min: 0, max: 25000 },
   { label: "₹25,000 - ₹75,000", min: 25000, max: 75000 },
@@ -14,10 +14,7 @@ const PRICE_PRESETS = [
   { label: "Above ₹1,50,000", min: 150000, max: Infinity },
 ];
 
-const DEFAULT_PRICE_MIN = 0;
-const DEFAULT_PRICE_MAX = 200000;
-
-const API_URL = process.env.REACT_APP_API_URL;
+const API_URL = process.env.REACT_APP_API_URL || "https://sarees-backend-9wq0.onrender.com";
 
 const SORT_OPTIONS = [
   { value: "popularity", label: "Popularity" },
@@ -28,7 +25,7 @@ const SORT_OPTIONS = [
 ];
 
 const CATEGORY_VISIBLE_LIMIT = 6;
-const PAGE_SIZE = 16;
+const PAGE_SIZE = 12;
 
 // The API doesn't return a rating field yet, but JewelryCard reads
 // product.rating to fill stars. This derives a stable per-product
@@ -48,6 +45,10 @@ const JewelryGrid = ({ onViewDetails }) => {
   const [error, setError] = useState("");
 
   const [page, setPage] = useState(1);
+  // Server-reported pagination info (falls back gracefully if the API
+  // doesn't send these fields under these exact names).
+  const [totalCount, setTotalCount] = useState(0);
+  const [totalPagesFromApi, setTotalPagesFromApi] = useState(1);
 
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedSubcategory, setSelectedSubcategory] = useState("All");
@@ -57,8 +58,10 @@ const JewelryGrid = ({ onViewDetails }) => {
 
   const [showAllCategories, setShowAllCategories] = useState(false);
 
-  const [priceMin, setPriceMin] = useState(DEFAULT_PRICE_MIN);
-  const [priceMax, setPriceMax] = useState(DEFAULT_PRICE_MAX);
+  // No price filter is active until the user picks a preset or applies
+  // a custom range — so every product shows by default, regardless of
+  // price. `priceRange` is null = "show everything".
+  const [priceRange, setPriceRange] = useState(null);
   const [activePreset, setActivePreset] = useState(null);
 
   // Custom min/max entry fields — user must enter Min first, and Max
@@ -71,16 +74,17 @@ const JewelryGrid = ({ onViewDetails }) => {
 
   const pillsRef = useRef(null);
 
-  // Fetch the full jewelry list once. Filtering + pagination below are
-  // handled entirely on the client so the sidebar filters, price range
-  // and the 16-per-page grid all work off the same data set.
+  // Fetch one page of jewelry at a time from the API using page +
+  // limit query params. Runs again whenever `page` changes.
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
         setError("");
 
-        const res = await fetch(`${API_URL}/products/get-jewels`);
+        const res = await fetch(
+          `${API_URL}/products/get-jewels?page=${page}&limit=${PAGE_SIZE}`
+        );
         if (!res.ok) throw new Error("API response not OK");
 
         const data = await res.json();
@@ -91,21 +95,36 @@ const JewelryGrid = ({ onViewDetails }) => {
           : [];
 
         setProducts(activeProducts);
+
+        // Try to read pagination metadata from common response shapes.
+        const apiTotal =
+          data.total ?? data.totalCount ?? data.count ?? activeProducts.length;
+        const apiTotalPages =
+          data.totalPages ??
+          data.pages ??
+          Math.max(1, Math.ceil(apiTotal / PAGE_SIZE));
+
+        setTotalCount(apiTotal);
+        setTotalPagesFromApi(apiTotalPages);
       } catch (err) {
         console.error("Failed to fetch jewelry:", err);
         setError("Unable to load products. Please try again later.");
         setProducts([]);
+        setTotalCount(0);
+        setTotalPagesFromApi(1);
       } finally {
         setLoading(false);
       }
     };
 
     fetchProducts();
-  }, []);
+  }, [page]);
 
   // NOTE: category object's field is `name` (not `category`) —
   // { id, name, collection } — so every lookup below reads
   // product.category?.name.
+  // NOTE: since `products` now only holds the current page's items,
+  // these facet lists only reflect what's on the current page.
   const categories = useMemo(
     () => ["All", ...new Set(products.map((p) => p.category?.name).filter(Boolean))],
     [products]
@@ -159,14 +178,14 @@ const JewelryGrid = ({ onViewDetails }) => {
     setMaxInput("");
     setPriceError("");
     if (activePreset?.label === preset.label) {
+      // Toggling the same preset off removes the price filter entirely
+      // — back to showing everything.
       setActivePreset(null);
-      setPriceMin(DEFAULT_PRICE_MIN);
-      setPriceMax(DEFAULT_PRICE_MAX);
+      setPriceRange(null);
       return;
     }
     setActivePreset(preset);
-    setPriceMin(preset.min);
-    setPriceMax(preset.max === Infinity ? DEFAULT_PRICE_MAX : preset.max);
+    setPriceRange({ min: preset.min, max: preset.max });
     setPage(1);
   };
 
@@ -194,8 +213,7 @@ const JewelryGrid = ({ onViewDetails }) => {
 
     setPriceError("");
     setActivePreset(null);
-    setPriceMin(min);
-    setPriceMax(max);
+    setPriceRange({ min, max });
     setPage(1);
   };
 
@@ -203,8 +221,7 @@ const JewelryGrid = ({ onViewDetails }) => {
     setSelectedCategory("All");
     setSelectedSubcategory("All");
     setSelectedMetal("All");
-    setPriceMin(DEFAULT_PRICE_MIN);
-    setPriceMax(DEFAULT_PRICE_MAX);
+    setPriceRange(null);
     setActivePreset(null);
     setMinInput("");
     setMaxInput("");
@@ -219,6 +236,9 @@ const JewelryGrid = ({ onViewDetails }) => {
     pillsRef.current.scrollBy({ left: dir * 200, behavior: "smooth" });
   };
 
+  // Filtering/sorting now only operates on the current page's fetched
+  // products (server-side pagination handles the "which 12 products"
+  // part; this just refines what's shown from that batch).
   const filteredProducts = useMemo(() => {
     let list = products.filter((product) => {
       const name = product.name?.toLowerCase() || "";
@@ -242,7 +262,9 @@ const JewelryGrid = ({ onViewDetails }) => {
       const matchSearch =
         !search || name.includes(search) || category.includes(search) || desc.includes(search);
 
-      const matchPrice = price >= priceMin && price <= priceMax;
+      // No price filter selected yet → every product passes.
+      const matchPrice =
+        !priceRange || (price >= priceRange.min && price <= priceRange.max);
 
       return matchCategory && matchSubcategory && matchMetal && matchSearch && matchPrice;
     });
@@ -277,19 +299,16 @@ const JewelryGrid = ({ onViewDetails }) => {
     selectedSubcategory,
     selectedMetal,
     searchTerm,
-    priceMin,
-    priceMax,
+    priceRange,
     sortBy,
   ]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / PAGE_SIZE));
+  // Pagination is now driven by the API's reported total pages, not a
+  // local slice of a full product array.
+  const totalPages = Math.max(1, totalPagesFromApi);
   const currentPage = Math.min(page, totalPages);
-  const paginatedProducts = filteredProducts.slice(
-    (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE
-  );
 
-  const total = filteredProducts.length;
+  const total = totalCount;
   const rangeStart = total === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
   const rangeEnd = Math.min(currentPage * PAGE_SIZE, total);
 
@@ -505,7 +524,7 @@ const JewelryGrid = ({ onViewDetails }) => {
             ) : (
               <>
                 <div className="product-grid show">
-                  {paginatedProducts.map((product) => (
+                  {filteredProducts.map((product) => (
                     // Double-click opens the full product modal.
                     <div key={product.id} onDoubleClick={() => onViewDetails(product)}>
                       <JewelryCard product={product} onViewDetails={onViewDetails} />

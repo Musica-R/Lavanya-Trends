@@ -11,7 +11,10 @@ const JewelryModal = ({ product, onClose }) => {
     const firstAttribute = product.attributes?.[0];
     const image = firstAttribute?.image_url || product.image_url || product.image;
     const price = parseFloat(product.offerPrice || product.price) || 0;
-    const categoryLabel = product.category?.category || product.category || "";
+
+    // category object's field is `name`, e.g. { id, name: "Gold", collection: "JEWEL" }
+    const categoryLabel =
+        (typeof product.category === "string" ? product.category : product.category?.name) || "";
 
     const handleAddToCart = () => {
         addToCart(product, quantity);
