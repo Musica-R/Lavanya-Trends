@@ -125,7 +125,7 @@ const HomeProduct = () => {
   useEffect(() => {
     const fetchHotLoom = async () => {
       try {
-        const res = await fetch(`${API_URL}/products/get-products`);
+        const res = await fetch(`${API_URL}/products/get-looms`);
 
         if (!res.ok) {
           throw new Error("API response not OK");

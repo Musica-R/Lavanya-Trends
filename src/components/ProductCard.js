@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import '../styles/ProductCard.css';
-import { FaStar } from "react-icons/fa";
+import { FaStar, FaHeart, FaRegHeart } from "react-icons/fa";
 
 // Replicates Next.js <Image fill /> behavior for plain <img>
 const fillStyle = {
@@ -25,7 +25,7 @@ const getProductImage = (product) => {
     return withImage?.image_url || FALLBACK_IMAGE;
 };
 
-const ProductCard = ({ product, onViewDetails }) => {
+const ProductCard = ({ product, onViewDetails, isFavorite, onToggleFavorite }) => {
     const { addToCart } = useCart();
     const [loaded, setLoaded] = useState(false);
     const [imgSrc, setImgSrc] = useState(() => getProductImage(product));
@@ -47,6 +47,14 @@ const ProductCard = ({ product, onViewDetails }) => {
         }
     };
 
+    // Stop the click from bubbling up to the card's onDoubleClick /
+    // Quick View overlay, then hand off to the parent's toggle handler
+    // (which owns the actual add/remove API call).
+    const handleFavoriteClick = (e) => {
+        e.stopPropagation();
+        onToggleFavorite?.();
+    };
+
     return (
         <div className="product-card" id="product">
             {/* Product Image */}
@@ -66,6 +74,22 @@ const ProductCard = ({ product, onViewDetails }) => {
                     onLoad={() => setLoaded(true)}
                     onError={handleImageError}
                 />
+
+                {/* Favorite (heart) button */}
+                <button
+                    type="button"
+                    className={`favorite-btn${isFavorite ? " active" : ""}`}
+                    onClick={handleFavoriteClick}
+                    aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+                    aria-pressed={isFavorite}
+                >
+                    {isFavorite ? (
+                        <FaHeart style={{ color: "#e63950" }} />
+                    ) : (
+                        <FaRegHeart style={{ color: "#fff" }} />
+                    )}
+                </button>
+
                 <div className="product-overlay">
                     <button className="view-details-btn" onClick={() => onViewDetails(product)}>
                         Quick View

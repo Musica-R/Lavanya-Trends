@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import '../styles/ProductCard.css';
-import { FaStar } from "react-icons/fa";
+import { FaStar, FaHeart, FaRegHeart } from "react-icons/fa";
 
 const fillStyle = {
     position: "absolute",
@@ -11,7 +11,7 @@ const fillStyle = {
     height: "100%",
 };
 
-const JewelryCard = ({ product }) => {
+const JewelryCard = ({ product, isFavorite, onToggleFavorite }) => {
     const navigate = useNavigate();
     const { addToCart } = useCart();
 
@@ -30,6 +30,14 @@ const JewelryCard = ({ product }) => {
         navigate(`/jewelry/${product.id}`, { state: { product } });
     };
 
+    // Same idea — stop the click bubbling up to the card's onClick
+    // navigate handler, then hand off to the parent's toggle handler
+    // (which owns the actual add/remove API call).
+    const handleFavoriteClick = (e) => {
+        e.stopPropagation();
+        onToggleFavorite?.();
+    };
+
     return (
         <div className="product-card" id="product">
             {/* Product Image */}
@@ -40,6 +48,22 @@ const JewelryCard = ({ product }) => {
                     style={fillStyle}
                     className="product-image"
                 />
+
+                {/* Favorite (heart) button */}
+                <button
+                    type="button"
+                    className={`favorite-btn${isFavorite ? " active" : ""}`}
+                    onClick={handleFavoriteClick}
+                    aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+                    aria-pressed={isFavorite}
+                >
+                    {isFavorite ? (
+                        <FaHeart style={{ color: "#e63950" }} />
+                    ) : (
+                        <FaRegHeart style={{ color: "#fff" }} />
+                    )}
+                </button>
+
                 <div className="product-overlay">
                     <button className="view-details-btn" onClick={goToDetails}>
                         Quick View

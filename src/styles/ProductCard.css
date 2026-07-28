@@ -156,6 +156,32 @@
     transform: scale(0.95);
 }
 
+.favorite-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.favorite-btn:hover {
+  background: rgba(0, 0, 0, 0.55);
+  transform: scale(1.08);
+}
+
+.favorite-btn.active {
+  background: rgba(255, 255, 255, 0.9);
+}
+
 /* ===========================
    LAPTOP (max-width: 1024px)
 =========================== */

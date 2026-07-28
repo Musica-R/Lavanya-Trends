@@ -17,6 +17,11 @@ const PRICE_PRESETS = [
 
 const API_URL = process.env.REACT_APP_API_URL || "https://sarees-backend-9wq0.onrender.com";
 
+// TODO: replace with the real logged-in user's id from your auth
+// context/state once available. Hardcoded for now to match the
+// endpoints you gave (userId=1).
+const CURRENT_USER_ID = 1;
+
 const SORT_OPTIONS = [
   { value: "popularity", label: "Popularity" },
   { value: "newest", label: "Newest First" },
@@ -74,6 +79,13 @@ const JewelryGrid = () => {
 
   const [sortBy, setSortBy] = useState("popularity");
 
+  // ---- Favorites (heart button) state ----
+  // Set of productIds the current user has favorited (jewelry only).
+  const [favorites, setFavorites] = useState(() => new Set());
+  // Tracks in-flight requests per productId so rapid double-clicks
+  // don't fire duplicate add/remove calls for the same product.
+  const [favoritePending, setFavoritePending] = useState(() => new Set());
+
   const pillsRef = useRef(null);
 
   // Fetch one page of jewelry at a time from the API using page +
@@ -121,6 +133,37 @@ const JewelryGrid = () => {
 
     fetchProducts();
   }, [page]);
+
+  // Fetch the user's already-favorited jewelry once on mount, so a
+  // piece that was favorited in an earlier session still shows a red
+  // (filled) heart on load instead of starting empty every time.
+  // Filtered to productType "jewel" since the same endpoint also
+  // returns saree favorites for this user, and product ids can
+  // overlap across the two tables.
+  useEffect(() => {
+    const fetchFavorites = async () => {
+      try {
+        const res = await fetch(
+          `${API_URL}/favourites/my-favorites?userId=${CURRENT_USER_ID}`
+        );
+        if (!res.ok) throw new Error("Failed to fetch favorites");
+
+        const data = await res.json();
+        const favoriteIds = Array.isArray(data.data)
+          ? data.data
+              .filter((fav) => fav.productType?.toLowerCase() === "jewel")
+              .map((fav) => fav.productId)
+          : [];
+
+        setFavorites(new Set(favoriteIds));
+      } catch (err) {
+        console.error("Failed to fetch favorites:", err);
+        // Leave favorites empty on failure rather than blocking the page.
+      }
+    };
+
+    fetchFavorites();
+  }, []);
 
   // NOTE: category object's field is `name` (not `category`) —
   // { id, name, collection } — so every lookup below reads
@@ -236,6 +279,66 @@ const JewelryGrid = () => {
   const scrollPills = (dir) => {
     if (!pillsRef.current) return;
     pillsRef.current.scrollBy({ left: dir * 200, behavior: "smooth" });
+  };
+
+  // ---- Favorite toggle: add-favorites (POST) / remove-favorites (GET) ----
+  // Optimistically flips the heart immediately, then calls the right
+  // endpoint. If the request fails, the heart reverts back.
+  const toggleFavorite = async (product) => {
+    const productId = product.id;
+
+    // Ignore clicks while a request for this product is already in flight.
+    if (favoritePending.has(productId)) return;
+
+    const wasFavorite = favorites.has(productId);
+
+    // Optimistic UI update — fill/unfill the heart right away.
+    setFavorites((prev) => {
+      const next = new Set(prev);
+      if (wasFavorite) next.delete(productId);
+      else next.add(productId);
+      return next;
+    });
+
+    setFavoritePending((prev) => new Set(prev).add(productId));
+
+    try {
+      if (wasFavorite) {
+        // Was already a favorite -> remove it.
+        const res = await fetch(
+          `${API_URL}/favourites/remove-favorites?userId=${CURRENT_USER_ID}&productId=${productId}&productType=jewel`,
+          { method: "GET" }
+        );
+        if (!res.ok) throw new Error("Failed to remove favorite");
+      } else {
+        // Not a favorite yet -> add it.
+        const res = await fetch(`${API_URL}/favourites/add-favorites`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId: CURRENT_USER_ID,
+            productId,
+            productType: "JEWEL",
+          }),
+        });
+        if (!res.ok) throw new Error("Failed to add favorite");
+      }
+    } catch (err) {
+      console.error("Favorite toggle failed:", err);
+      // Revert the optimistic update since the API call failed.
+      setFavorites((prev) => {
+        const next = new Set(prev);
+        if (wasFavorite) next.add(productId);
+        else next.delete(productId);
+        return next;
+      });
+    } finally {
+      setFavoritePending((prev) => {
+        const next = new Set(prev);
+        next.delete(productId);
+        return next;
+      });
+    }
   };
 
   // Filtering/sorting now only operates on the current page's fetched
@@ -531,7 +634,11 @@ const JewelryGrid = () => {
                       key={product.id}
                       onClick={() => navigate(`/jewelry/${product.id}`, { state: { product } })}
                     >
-                      <JewelryCard product={product} />
+                      <JewelryCard
+                        product={product}
+                        isFavorite={favorites.has(product.id)}
+                        onToggleFavorite={() => toggleFavorite(product)}
+                      />
                     </div>
                   ))}
                 </div>
