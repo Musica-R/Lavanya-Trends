@@ -3,6 +3,7 @@ import JewelryCard from "./JewelryCard";
 import { useSearch } from "../context/SearchContext";
 import "../styles/JewelryGrid.css";
 import Loader from "./Loader";
+import { useNavigate } from "react-router-dom";
 
 // Jewelry runs at a very different price scale than sarees (₹20k–₹1L+),
 // so these presets are jewelry-specific — do not reuse the saree
@@ -37,7 +38,8 @@ const withRating = (product) => {
   return { ...product, rating: Math.min(rating, 5) };
 };
 
-const JewelryGrid = ({ onViewDetails }) => {
+const JewelryGrid = () => {
+  const navigate = useNavigate();
   const { searchTerm, setSearchTerm } = useSearch();
 
   const [products, setProducts] = useState([]);
@@ -525,9 +527,11 @@ const JewelryGrid = ({ onViewDetails }) => {
               <>
                 <div className="product-grid show">
                   {filteredProducts.map((product) => (
-                    // Double-click opens the full product modal.
-                    <div key={product.id} onDoubleClick={() => onViewDetails(product)}>
-                      <JewelryCard product={product} onViewDetails={onViewDetails} />
+                    <div
+                      key={product.id}
+                      onClick={() => navigate(`/jewelry/${product.id}`, { state: { product } })}
+                    >
+                      <JewelryCard product={product} />
                     </div>
                   ))}
                 </div>

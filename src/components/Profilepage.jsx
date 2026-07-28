@@ -6,8 +6,24 @@ import { PiFlowerLotusThin } from "react-icons/pi";
 import { MdOutlinePerson } from "react-icons/md";
 import { MdOutlineMailOutline } from "react-icons/md";
 import { IoMdPhonePortrait } from "react-icons/io";
+import { MdOutlineCalendarToday } from "react-icons/md";
+import { MdOutlineLocationOn } from "react-icons/md";
+import { MdOutlineFavoriteBorder } from "react-icons/md";
+import { MdOutlineFavorite } from "react-icons/md";
+import { MdOutlineLock } from "react-icons/md";
+import { MdOutlineNotificationsNone } from "react-icons/md";
+import { MdOutlineLogout } from "react-icons/md";
+import { MdOutlineBarChart } from "react-icons/md";
+import { MdOutlineShoppingBag } from "react-icons/md";
+import { MdOutlineLocalOffer } from "react-icons/md";
+import { MdOutlineLocalShipping } from "react-icons/md";
+import { MdOutlineSecurity } from "react-icons/md";
+import { MdOutlineSupportAgent } from "react-icons/md";
+import { MdClose } from "react-icons/md";
 
-const ORDERS_API = "https://nithi-billing.ddnsgeek.com/sarees/new/orders";
+const BASE_API = "https://sarees-backend-9wq0.onrender.com";
+const ORDERS_API = `${BASE_API}/orders/get-user-order`;
+const UPDATE_CUSTOMER_API = `${BASE_API}/users/update-customer`;
 
 const ProfilePage = () => {
   const navigate = useNavigate();
@@ -17,6 +33,21 @@ const ProfilePage = () => {
   const [loadingBookings, setLoadingBookings] = useState(false);
   const [bookingsError, setBookingsError] = useState("");
 
+  // Edit profile state
+  const [isEditing, setIsEditing] = useState(false);
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+    state: "",
+    city: "",
+    pincode: "",
+  });
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [saveError, setSaveError] = useState("");
+  const [saveSuccess, setSaveSuccess] = useState("");
+
   // Guard: if not logged in, redirect straight to login
   useEffect(() => {
     const stored = localStorage.getItem("user");
@@ -25,25 +56,44 @@ const ProfilePage = () => {
       return;
     }
     try {
-      setUser(JSON.parse(stored));
+      const parsed = JSON.parse(stored);
+      setUser(parsed);
+      setForm({
+        name: parsed.name || "",
+        email: parsed.email || "",
+        phone: parsed.phoneNo || parsed.phone || "",
+        address: parsed.address || "",
+        state: parsed.state || "",
+        city: parsed.city || "",
+        pincode: parsed.pincode || "",
+      });
     } catch {
       localStorage.removeItem("user");
       navigate("/login", { replace: true });
     }
   }, [navigate]);
 
+  // The order/customer response keys the user by "id" (see user.id / customer.userId
+  // in the API payload), so that's the field pulled from whatever's in localStorage.
+  const getUserId = (u) => u?.id || u?.userId || u?._id;
+
   // Fetch bookings once we know who the user is and the tab is opened
   useEffect(() => {
     if (activeTab !== "bookings" || !user) return;
+
+    const userId = getUserId(user);
+    if (!userId) {
+      setBookingsError("Could not identify your account. Please log in again.");
+      return;
+    }
 
     const fetchBookings = async () => {
       setLoadingBookings(true);
       setBookingsError("");
       try {
-        const res = await axios.get(ORDERS_API, {
-          params: { email: user.email },
-        });
-        setBookings(res.data?.data || res.data || []);
+        const res = await axios.get(`${ORDERS_API}/${userId}`);
+        // Real response shape: { success, userId, orders: [...], currentPage, totalPages, total }
+        setBookings(res.data?.orders || []);
       } catch (err) {
         setBookingsError("Could not load your bookings right now. Please try again later.");
       } finally {
@@ -57,6 +107,76 @@ const ProfilePage = () => {
   const handleLogout = () => {
     localStorage.removeItem("user");
     navigate("/login", { replace: true });
+  };
+
+  const handleFormChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const openEdit = () => {
+    setSaveError("");
+    setSaveSuccess("");
+    setIsEditing(true);
+  };
+
+  const closeEdit = () => {
+    setIsEditing(false);
+  };
+
+  const handleSaveProfile = async () => {
+    const userId = getUserId(user);
+    if (!userId) {
+      setSaveError("Could not identify your account. Please log in again.");
+      return;
+    }
+
+    setSavingProfile(true);
+    setSaveError("");
+    setSaveSuccess("");
+
+    try {
+      const payload = {
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+        address: form.address,
+        state: form.state,
+        city: form.city,
+        pincode: form.pincode,
+        userId,
+      };
+
+      const res = await axios.post(`${UPDATE_CUSTOMER_API}/${userId}`, payload);
+      const updatedUser = { ...user, ...(res.data?.data || res.data || payload) };
+
+      setUser(updatedUser);
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      setSaveSuccess("Profile updated successfully.");
+      setIsEditing(false);
+    } catch (err) {
+      setSaveError("Could not update your profile right now. Please try again later.");
+    } finally {
+      setSavingProfile(false);
+    }
+  };
+
+  const formatDate = (iso) => {
+    if (!iso) return "";
+    try {
+      return new Date(iso).toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      });
+    } catch {
+      return iso;
+    }
+  };
+
+  const imageUrl = (path) => {
+    if (!path) return "";
+    return path.startsWith("http") ? path : `${BASE_API}${path}`;
   };
 
   if (!user) return null; // brief flash before redirect effect runs
@@ -79,28 +199,28 @@ const ProfilePage = () => {
             className={`lav-profile-nav-item ${activeTab === "profile" ? "active" : ""}`}
             onClick={() => setActiveTab("profile")}
           >
-            <span className="lav-profile-nav-icon">👤</span> My Profile
+            <span className="lav-profile-nav-icon"><MdOutlinePerson /></span> My Profile
           </button>
           <button
             className={`lav-profile-nav-item ${activeTab === "bookings" ? "active" : ""}`}
             onClick={() => setActiveTab("bookings")}
           >
-            <span className="lav-profile-nav-icon">📅</span> My Bookings
+            <span className="lav-profile-nav-icon"><MdOutlineCalendarToday /></span> My Bookings
           </button>
+          {/* <button className="lav-profile-nav-item" disabled>
+            <span className="lav-profile-nav-icon"><MdOutlineLocationOn /></span> Address Book
+          </button> */}
           <button className="lav-profile-nav-item" disabled>
-            <span className="lav-profile-nav-icon">📍</span> Address Book
+            <span className="lav-profile-nav-icon"><MdOutlineFavoriteBorder /></span> Wishlist
           </button>
-          <button className="lav-profile-nav-item" disabled>
-            <span className="lav-profile-nav-icon">♡</span> Wishlist
-          </button>
-          <button className="lav-profile-nav-item" disabled>
-            <span className="lav-profile-nav-icon">🔒</span> Change Password
-          </button>
-          <button className="lav-profile-nav-item" disabled>
-            <span className="lav-profile-nav-icon">🔔</span> Notifications
-          </button>
+          {/* <button className="lav-profile-nav-item" disabled>
+            <span className="lav-profile-nav-icon"><MdOutlineLock /></span> Change Password
+          </button> */}
+          {/* <button className="lav-profile-nav-item" disabled>
+            <span className="lav-profile-nav-icon"><MdOutlineNotificationsNone /></span> Notifications
+          </button> */}
           <button className="lav-profile-nav-item lav-profile-logout" onClick={handleLogout}>
-            <span className="lav-profile-nav-icon">⎋</span> Logout
+            <span className="lav-profile-nav-icon"><MdOutlineLogout /></span> Logout
           </button>
         </nav>
       </aside>
@@ -125,8 +245,15 @@ const ProfilePage = () => {
             <section className="lav-profile-card">
               <div className="lav-profile-card-header">
                 <h2>Personal Information</h2>
-                <button className="lav-profile-edit-btn">✎ Edit Profile</button>
+                <button className="lav-profile-edit-btn" onClick={openEdit}>
+                  ✎ Edit Profile
+                </button>
               </div>
+
+              {saveSuccess && (
+                <p className="lav-profile-status lav-profile-success">{saveSuccess}</p>
+              )}
+
               <div className="lav-profile-field">
                 <span className="lav-profile-field-icon"><MdOutlinePerson /></span>
                 <div>
@@ -141,12 +268,25 @@ const ProfilePage = () => {
                   <span className="lav-profile-value">{user.email}</span>
                 </div>
               </div>
-              {user.phoneNo && (
+              {(user.phoneNo || user.phone) && (
                 <div className="lav-profile-field">
                   <span className="lav-profile-field-icon"><IoMdPhonePortrait /></span>
                   <div>
                     <span className="lav-profile-label">Mobile Number</span>
-                    <span className="lav-profile-value">{user.phoneNo}</span>
+                    <span className="lav-profile-value">{user.phoneNo || user.phone}</span>
+                  </div>
+                </div>
+              )}
+              {user.address && (
+                <div className="lav-profile-field">
+                  <span className="lav-profile-field-icon"><MdOutlineLocationOn /></span>
+                  <div>
+                    <span className="lav-profile-label">Address</span>
+                    <span className="lav-profile-value">
+                      {[user.address, user.city, user.state, user.pincode]
+                        .filter(Boolean)
+                        .join(", ")}
+                    </span>
                   </div>
                 </div>
               )}
@@ -168,15 +308,48 @@ const ProfilePage = () => {
 
               {!loadingBookings && bookings.length > 0 && (
                 <ul className="lav-profile-booking-list">
-                  {bookings.map((order, idx) => (
-                    <li key={order.id || idx} className="lav-profile-booking-item">
+                  {bookings.map((order) => (
+                    <li key={order.id} className="lav-profile-booking-item">
                       <div className="lav-profile-booking-header">
-                        <span>Order #{order.id || idx + 1}</span>
+                        <span>{order.orderNumber || `Order #${order.id}`}</span>
                         <span className="lav-profile-booking-status">{order.status || "Placed"}</span>
                       </div>
+
+                      <div className="lav-profile-booking-items">
+                        {(order.items || []).map((item) => (
+                          <div key={item.id} className="lav-profile-booking-line">
+                            {item.image_url && (
+                              <img
+                                className="lav-profile-booking-thumb"
+                                src={imageUrl(item.image_url)}
+                                alt={item.productName}
+                              />
+                            )}
+                            <div className="lav-profile-booking-line-info">
+                              <span className="lav-profile-booking-line-name">
+                                {item.productName}
+                              </span>
+                              <span className="lav-profile-booking-line-meta">
+                                {[item.color, item.size, item.fabric].filter(Boolean).join(" · ")}
+                                {item.quantity ? ` · Qty ${item.quantity}` : ""}
+                              </span>
+                            </div>
+                            <span className="lav-profile-booking-line-price">
+                              ₹{item.subtotal || item.price || "-"}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="lav-profile-booking-shipto">
+                        Shipping to: {[order.shippingAddress, order.shippingCity, order.shippingState, order.shippingPincode]
+                          .filter(Boolean)
+                          .join(", ")}
+                      </div>
+
                       <div className="lav-profile-booking-details">
-                        <span>{order.date || ""}</span>
-                        <span>₹{order.total || order.amount || "-"}</span>
+                        <span>{formatDate(order.createdAt)}</span>
+                        <span>Total: ₹{order.grandTotal || order.subtotal || "-"}</span>
                       </div>
                     </li>
                   ))}
@@ -188,24 +361,24 @@ const ProfilePage = () => {
           {/* Account overview side panel */}
           <aside className="lav-profile-overview">
             <h2>
-              <span className="lav-profile-overview-icon">📊</span> Account Overview
+              <span className="lav-profile-overview-icon lav-icon-plain"><MdOutlineBarChart /></span> Account Overview
             </h2>
             <div className="lav-profile-overview-item">
-              <span className="lav-profile-overview-icon lav-icon-pink">🛍</span>
+              <span className="lav-profile-overview-icon lav-icon-pink"><MdOutlineShoppingBag /></span>
               <div>
                 <span className="lav-profile-label">Total Orders</span>
                 <span className="lav-profile-value">{totalOrders}</span>
               </div>
             </div>
             <div className="lav-profile-overview-item">
-              <span className="lav-profile-overview-icon lav-icon-peach">🏷</span>
+              <span className="lav-profile-overview-icon lav-icon-peach"><MdOutlineLocalOffer /></span>
               <div>
                 <span className="lav-profile-label">Wishlist Items</span>
                 <span className="lav-profile-value">8</span>
               </div>
             </div>
             <div className="lav-profile-overview-item">
-              <span className="lav-profile-overview-icon lav-icon-mint">♥</span>
+              <span className="lav-profile-overview-icon lav-icon-mint"><MdOutlineFavorite /></span>
               <div>
                 <span className="lav-profile-label">Account Member Since</span>
                 <span className="lav-profile-value">July 2025</span>
@@ -228,23 +401,79 @@ const ProfilePage = () => {
           </div>
           <div className="lav-profile-perks">
             <div className="lav-profile-perk">
-              <span>🚚</span>
+              <span><MdOutlineLocalShipping /></span>
               <strong>Free Shipping</strong>
               <small>On orders above ₹2999</small>
             </div>
             <div className="lav-profile-perk">
-              <span>🛡</span>
+              <span><MdOutlineSecurity /></span>
               <strong>Secure Payments</strong>
               <small>100% safe &amp; secure</small>
             </div>
             <div className="lav-profile-perk">
-              <span>🎧</span>
+              <span><MdOutlineSupportAgent /></span>
               <strong>Customer Support</strong>
               <small>We're here to help</small>
             </div>
           </div>
         </section>
       </main>
+
+      {/* Edit Profile modal */}
+      {isEditing && (
+        <div className="lav-profile-modal-overlay" onClick={closeEdit}>
+          <div className="lav-profile-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="lav-profile-modal-header">
+              <h2>Edit Profile</h2>
+              <button className="lav-profile-modal-close" onClick={closeEdit}>
+                <MdClose />
+              </button>
+            </div>
+
+            {saveError && <p className="lav-profile-status lav-profile-error">{saveError}</p>}
+
+            <div className="lav-profile-form-grid">
+              <div className="lav-profile-form-field">
+                <label>Full Name</label>
+                <input name="name" value={form.name} onChange={handleFormChange} />
+              </div>
+              {/* <div className="lav-profile-form-field">
+                <label>Email Address</label>
+                <input name="email" type="email" value={form.email} onChange={handleFormChange} />
+              </div> */}
+              <div className="lav-profile-form-field">
+                <label>Mobile Number</label>
+                <input name="phone" value={form.phone} onChange={handleFormChange} />
+              </div>
+              <div className="lav-profile-form-field lav-profile-form-field-full">
+                <label>Address</label>
+                <input name="address" value={form.address} onChange={handleFormChange} />
+              </div>
+              <div className="lav-profile-form-field">
+                <label>City</label>
+                <input name="city" value={form.city} onChange={handleFormChange} />
+              </div>
+              <div className="lav-profile-form-field">
+                <label>State</label>
+                <input name="state" value={form.state} onChange={handleFormChange} />
+              </div>
+              <div className="lav-profile-form-field">
+                <label>Pincode</label>
+                <input name="pincode" value={form.pincode} onChange={handleFormChange} />
+              </div>
+            </div>
+
+            <div className="lav-profile-modal-actions">
+              <button className="lav-profile-cancel-btn" onClick={closeEdit} disabled={savingProfile}>
+                Cancel
+              </button>
+              <button className="lav-profile-save-btn" onClick={handleSaveProfile} disabled={savingProfile}>
+                {savingProfile ? "Saving..." : "Save Changes"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -3,6 +3,7 @@ import ProductCard from "./ProductCard";
 import { useSearch } from "../context/SearchContext";
 import "../styles/ProductGrid.css";
 import Loader from "./Loader";
+import { useNavigate } from "react-router-dom";
 
 const PRICE_PRESETS = [
   { label: "Under ₹999", min: 0, max: 999 },
@@ -35,6 +36,7 @@ const withRating = (product) => {
 };
 
 const ProductGrid = ({ onViewDetails }) => {
+  const navigate = useNavigate();
   const { searchTerm, setSearchTerm } = useSearch();
 
   const [products, setProducts] = useState([]);
@@ -163,6 +165,9 @@ const ProductGrid = ({ onViewDetails }) => {
     setPage(1);
   };
 
+  const handleViewDetails = (product) => {
+    navigate(`/product/${product.id}`, { state: { product } });
+  };
   const handleColorSelect = (color) => {
     setSelectedColor((prev) => (prev === color ? "All" : color));
     setPage(1);
@@ -545,8 +550,8 @@ const ProductGrid = ({ onViewDetails }) => {
                 <div className="product-grid show">
                   {filteredProducts.map((product) => (
                     // Double-click opens the full product modal.
-                    <div key={product.id} onDoubleClick={() => onViewDetails(product)}>
-                      <ProductCard product={product} onViewDetails={onViewDetails} />
+                    <div key={product.id} onDoubleClick={() => handleViewDetails(product)}>
+                      <ProductCard product={product} onViewDetails={handleViewDetails} />
                     </div>
                   ))}
                 </div>

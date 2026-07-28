@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import '../styles/ProductCard.css';
 import { FaStar } from "react-icons/fa";
@@ -10,7 +11,8 @@ const fillStyle = {
     height: "100%",
 };
 
-const JewelryCard = ({ product, onViewDetails }) => {
+const JewelryCard = ({ product }) => {
+    const navigate = useNavigate();
     const { addToCart } = useCart();
 
     const firstAttribute = product.attributes?.[0];
@@ -19,8 +21,14 @@ const JewelryCard = ({ product, onViewDetails }) => {
     const price = parseFloat(product.offerPrice || product.price) || 0;
     const originalPrice = parseFloat(product.price) || price;
     const discount = product.discount || 0;
-    // category object's field is `name`, e.g. { id, name: "Gold", collection: "JEWEL" }
     const categoryLabel = product.category?.name || product.category || "";
+
+    const goToDetails = (e) => {
+        // Stops the overlay button's click from also bubbling up to the
+        // wrapper <div onClick={...}> in JewelryGrid and double-navigating.
+        e.stopPropagation();
+        navigate(`/jewelry/${product.id}`, { state: { product } });
+    };
 
     return (
         <div className="product-card" id="product">
@@ -33,7 +41,7 @@ const JewelryCard = ({ product, onViewDetails }) => {
                     className="product-image"
                 />
                 <div className="product-overlay">
-                    <button className="view-details-btn" onClick={() => onViewDetails(product)}>
+                    <button className="view-details-btn" onClick={goToDetails}>
                         Quick View
                     </button>
                 </div>
