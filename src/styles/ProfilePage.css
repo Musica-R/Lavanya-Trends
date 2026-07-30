@@ -2,7 +2,7 @@
   display: flex;
   min-height: calc(100vh - 120px);
   max-width: 1200px;
-  margin: 30px auto;
+  margin: 70px auto;
   gap: 30px;
   padding: 0 20px;
   font-family: "Poppins", sans-serif;

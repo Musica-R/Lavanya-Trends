@@ -24,14 +24,28 @@ import { MdClose } from "react-icons/md";
 const BASE_API = "https://sarees-backend-9wq0.onrender.com";
 const ORDERS_API = `${BASE_API}/orders/get-user-order`;
 const UPDATE_CUSTOMER_API = `${BASE_API}/users/update-customer`;
+const PROFILE_STATS_API = `${BASE_API}/users/profile-stats`;
+const FAVORITES_API = `${BASE_API}/favourites/my-favorites`;
 
 const ProfilePage = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
-  const [activeTab, setActiveTab] = useState("profile"); // "profile" | "bookings"
+  const [activeTab, setActiveTab] = useState("profile"); // "profile" | "bookings" | "wishlist"
   const [bookings, setBookings] = useState([]);
   const [loadingBookings, setLoadingBookings] = useState(false);
   const [bookingsError, setBookingsError] = useState("");
+
+  // Account overview stats (Total Orders, Wishlist count, Member since)
+  // pulled from /users/profile-stats/:userId.
+  const [stats, setStats] = useState(null);
+  const [statsError, setStatsError] = useState("");
+
+  // Wishlist tab data, pulled from /favourites/my-favorites?userId=.
+  // Holds the raw favorite rows (each has a nested `product`), across
+  // both sarees and jewelry since the endpoint returns both.
+  const [favorites, setFavorites] = useState([]);
+  const [loadingFavorites, setLoadingFavorites] = useState(false);
+  const [favoritesError, setFavoritesError] = useState("");
 
   // Edit profile state
   const [isEditing, setIsEditing] = useState(false);
@@ -77,6 +91,28 @@ const ProfilePage = () => {
   // in the API payload), so that's the field pulled from whatever's in localStorage.
   const getUserId = (u) => u?.id || u?.userId || u?._id;
 
+  // Fetch account-overview stats (total orders, wishlist count, member
+  // since) as soon as we know who the user is — this powers the side
+  // panel regardless of which tab is active.
+  useEffect(() => {
+    if (!user) return;
+
+    const userId = getUserId(user);
+    if (!userId) return;
+
+    const fetchStats = async () => {
+      setStatsError("");
+      try {
+        const res = await axios.get(`${PROFILE_STATS_API}/${userId}`);
+        setStats(res.data?.data || null);
+      } catch (err) {
+        setStatsError("Could not load account overview.");
+      }
+    };
+
+    fetchStats();
+  }, [user]);
+
   // Fetch bookings once we know who the user is and the tab is opened
   useEffect(() => {
     if (activeTab !== "bookings" || !user) return;
@@ -102,6 +138,34 @@ const ProfilePage = () => {
     };
 
     fetchBookings();
+  }, [activeTab, user]);
+
+  // Fetch wishlist (favorites) once the Wishlist tab is opened. Each
+  // row includes a nested `product` object already, so no extra
+  // product lookups are needed.
+  useEffect(() => {
+    if (activeTab !== "wishlist" || !user) return;
+
+    const userId = getUserId(user);
+    if (!userId) {
+      setFavoritesError("Could not identify your account. Please log in again.");
+      return;
+    }
+
+    const fetchFavorites = async () => {
+      setLoadingFavorites(true);
+      setFavoritesError("");
+      try {
+        const res = await axios.get(`${FAVORITES_API}?userId=${userId}`);
+        setFavorites(Array.isArray(res.data?.data) ? res.data.data : []);
+      } catch (err) {
+        setFavoritesError("Could not load your wishlist right now. Please try again later.");
+      } finally {
+        setLoadingFavorites(false);
+      }
+    };
+
+    fetchFavorites();
   }, [activeTab, user]);
 
   const handleLogout = () => {
@@ -174,6 +238,20 @@ const ProfilePage = () => {
     }
   };
 
+  // Member-since display wants "Month Year" (e.g. "July 2026"), a bit
+  // shorter than the full day/month/year format used for bookings.
+  const formatMonthYear = (iso) => {
+    if (!iso) return "-";
+    try {
+      return new Date(iso).toLocaleDateString("en-IN", {
+        month: "long",
+        year: "numeric",
+      });
+    } catch {
+      return iso;
+    }
+  };
+
   const imageUrl = (path) => {
     if (!path) return "";
     return path.startsWith("http") ? path : `${BASE_API}${path}`;
@@ -181,7 +259,11 @@ const ProfilePage = () => {
 
   if (!user) return null; // brief flash before redirect effect runs
 
-  const totalOrders = bookings.length || 12;
+  // Prefer live stats from the API; fall back to fetched bookings
+  // length, then 0, if stats haven't loaded yet.
+  const totalOrders = stats?.totalOrders ?? bookings.length ?? 0;
+  const wishlistCount = stats?.likesCount ?? favorites.length ?? 0;
+  const memberSince = formatMonthYear(stats?.dateOfJoining);
 
   return (
     <div className="lav-profile-page">
@@ -207,10 +289,10 @@ const ProfilePage = () => {
           >
             <span className="lav-profile-nav-icon"><MdOutlineCalendarToday /></span> My Bookings
           </button>
-          {/* <button className="lav-profile-nav-item" disabled>
-            <span className="lav-profile-nav-icon"><MdOutlineLocationOn /></span> Address Book
-          </button> */}
-          <button className="lav-profile-nav-item" disabled>
+          <button
+            className={`lav-profile-nav-item ${activeTab === "wishlist" ? "active" : ""}`}
+            onClick={() => setActiveTab("wishlist")}
+          >
             <span className="lav-profile-nav-icon"><MdOutlineFavoriteBorder /></span> Wishlist
           </button>
           {/* <button className="lav-profile-nav-item" disabled>
@@ -358,11 +440,74 @@ const ProfilePage = () => {
             </section>
           )}
 
+          {activeTab === "wishlist" && (
+            <section className="lav-profile-card">
+              <div className="lav-profile-card-header">
+                <h2>My Wishlist</h2>
+              </div>
+
+              {loadingFavorites && <p className="lav-profile-status">Loading your wishlist...</p>}
+              {favoritesError && (
+                <p className="lav-profile-status lav-profile-error">{favoritesError}</p>
+              )}
+
+              {!loadingFavorites && !favoritesError && favorites.length === 0 && (
+                <p className="lav-profile-status">You haven't favorited anything yet.</p>
+              )}
+
+              {!loadingFavorites && favorites.length > 0 && (
+                <ul className="lav-profile-booking-list">
+                  {favorites.map((fav) => {
+                    const product = fav.product || {};
+                    const isJewel = fav.productType?.toUpperCase() === "JEWEL";
+                    return (
+                      <li
+                        key={fav.id}
+                        className="lav-profile-booking-item"
+                        style={{ cursor: "pointer" }}
+                        onClick={() =>
+                          navigate(
+                            isJewel ? `/jewelry/${product.id}` : `/product/${product.id}`,
+                            { state: { product } }
+                          )
+                        }
+                      >
+                        <div className="lav-profile-booking-line">
+                          {product.image_url && (
+                            <img
+                              className="lav-profile-booking-thumb"
+                              src={imageUrl(product.image_url)}
+                              alt={product.name}
+                            />
+                          )}
+                          <div className="lav-profile-booking-line-info">
+                            <span className="lav-profile-booking-line-name">
+                              {product.name}
+                            </span>
+                            <span className="lav-profile-booking-line-meta">
+                              {fav.productType} · Added {formatDate(fav.createdAt)}
+                            </span>
+                          </div>
+                          <span className="lav-profile-booking-line-price">
+                            ₹{product.offerPrice || product.price || "-"}
+                          </span>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </section>
+          )}
+
           {/* Account overview side panel */}
           <aside className="lav-profile-overview">
             <h2>
               <span className="lav-profile-overview-icon lav-icon-plain"><MdOutlineBarChart /></span> Account Overview
             </h2>
+
+            {statsError && <p className="lav-profile-status lav-profile-error">{statsError}</p>}
+
             <div className="lav-profile-overview-item">
               <span className="lav-profile-overview-icon lav-icon-pink"><MdOutlineShoppingBag /></span>
               <div>
@@ -374,14 +519,14 @@ const ProfilePage = () => {
               <span className="lav-profile-overview-icon lav-icon-peach"><MdOutlineLocalOffer /></span>
               <div>
                 <span className="lav-profile-label">Wishlist Items</span>
-                <span className="lav-profile-value">8</span>
+                <span className="lav-profile-value">{wishlistCount}</span>
               </div>
             </div>
             <div className="lav-profile-overview-item">
               <span className="lav-profile-overview-icon lav-icon-mint"><MdOutlineFavorite /></span>
               <div>
                 <span className="lav-profile-label">Account Member Since</span>
-                <span className="lav-profile-value">July 2025</span>
+                <span className="lav-profile-value">{memberSince}</span>
               </div>
             </div>
           </aside>
