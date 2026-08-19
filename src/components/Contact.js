@@ -34,6 +34,36 @@ const GALLERY = [
   },
 ];
 
+const API_URL = process.env.REACT_APP_API_URL || "https://sarees-backend-9wq0.onrender.com";
+
+// The UI shows friendly issue labels, but the API expects one of a
+// fixed set of requestType values — map one to the other here.
+const ISSUE_TYPE_TO_REQUEST_TYPE = {
+  "Order Issue": "order_inquiry",
+  "Payment Problem": "complaint",
+  "Delivery Delay": "complaint",
+  "Return / Refund": "complaint",
+  "Product Enquiry": "inquiry",
+};
+
+// Max attachment size the API accepts (5MB), enforced client-side so
+// the user gets instant feedback instead of a failed request.
+const MAX_ATTACHMENT_BYTES = 5 * 1024 * 1024;
+
+// Reads the logged-in user's id out of localStorage. Adjust the key
+// name below ("user") if your login flow writes to a different key.
+const getCurrentUserId = () => {
+  try {
+    const stored = localStorage.getItem("user");
+    if (!stored) return null;
+    const parsed = JSON.parse(stored);
+    return parsed?.id ?? null;
+  } catch (err) {
+    console.error("Failed to read user from localStorage:", err);
+    return null;
+  }
+};
+
 export default function Contact() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -41,31 +71,84 @@ export default function Contact() {
   const [orderId, setOrderId] = useState("");
   const [issueType, setIssueType] = useState("");
   const [message, setMessage] = useState("");
+  const [attachment, setAttachment] = useState(null);
   const [newsletterEmail, setNewsletterEmail] = useState("");
 
-  const handleWhatsAppSend = (e) => {
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const [submitSuccess, setSubmitSuccess] = useState("");
+
+  const handleAttachmentChange = (e) => {
+    const file = e.target.files?.[0] || null;
+
+    if (file && file.size > MAX_ATTACHMENT_BYTES) {
+      setSubmitError("Attachment must be 5MB or smaller.");
+      e.target.value = ""; // clear the invalid selection
+      setAttachment(null);
+      return;
+    }
+
+    setSubmitError("");
+    setAttachment(file);
+  };
+
+  const resetForm = () => {
+    setName("");
+    setEmail("");
+    setMobile("");
+    setOrderId("");
+    setIssueType("");
+    setMessage("");
+    setAttachment(null);
+  };
+
+  const handleSubmitRequest = async (e) => {
     e.preventDefault();
 
-    const phoneNumber = "918610766168"; // ✅ WhatsApp number (no +)
+    const userId = getCurrentUserId();
+    if (!userId) {
+      setSubmitError("Please log in to submit a support request.");
+      return;
+    }
 
-    const whatsappMessage = `
-Support Request
+    setSubmitting(true);
+    setSubmitError("");
+    setSubmitSuccess("");
 
-Name: ${name}
-Email: ${email}
-Mobile: ${mobile || "N/A"}
-Order ID: ${orderId || "N/A"}
-Issue Type: ${issueType || "N/A"}
+    try {
+      // FormData is used (rather than JSON) since an attachment file
+      // may be included alongside the regular fields.
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("email", email);
+      if (mobile) formData.append("phone", mobile);
+      formData.append("subject", issueType || "Support Request");
+      formData.append("message", message);
+      formData.append(
+        "requestType",
+        ISSUE_TYPE_TO_REQUEST_TYPE[issueType] || "other"
+      );
+      if (orderId) formData.append("orderId", orderId);
+      if (attachment) formData.append("attachment", attachment);
 
-Message:
-${message}
-    `;
+      const res = await fetch(
+        `${API_URL}/service-request/create-submit-request/${userId}`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
-    const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
-      whatsappMessage
-    )}`;
+      if (!res.ok) throw new Error("Request failed");
 
-    window.open(whatsappURL, "_blank");
+      setSubmitSuccess("Your support request has been submitted. We'll get back to you soon.");
+      resetForm();
+    } catch (err) {
+      console.error("Failed to submit support request:", err);
+      setSubmitError("Could not submit your request right now. Please try again later.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleNewsletterSubmit = (e) => {
@@ -159,7 +242,18 @@ ${message}
         <div className="contact-right">
           <h2>Submit a Support Request</h2>
 
-          <form className="form" onSubmit={handleWhatsAppSend}>
+          {submitSuccess && (
+            <p className="form-status form-success" style={{ color: "green" }}>
+              {submitSuccess}
+            </p>
+          )}
+          {submitError && (
+            <p className="form-status form-error" style={{ color: "red" }}>
+              {submitError}
+            </p>
+          )}
+
+          <form className="form" onSubmit={handleSubmitRequest}>
             <div className="form-row">
               <div className="form-field">
                 <input
@@ -224,8 +318,11 @@ ${message}
               required
             ></textarea>
 
-            <button className="Con-btn" type="submit">
-              Submit Request <LuSend />
+            <label>Attachment (Optional, max 5MB)</label>
+            <input type="file" onChange={handleAttachmentChange} />
+
+            <button className="Con-btn" type="submit" disabled={submitting}>
+              {submitting ? "Submitting..." : "Submit Request"} <LuSend />
             </button>
           </form>
         </div>
