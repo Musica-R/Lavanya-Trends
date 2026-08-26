@@ -21,7 +21,7 @@ import { MdOutlineSecurity } from "react-icons/md";
 import { MdOutlineSupportAgent } from "react-icons/md";
 import { MdClose } from "react-icons/md";
 
-const BASE_API = "https://sarees-backend-9wq0.onrender.com";
+const BASE_API = "https://mediumorchid-rhinoceros-818505.hostingersite.com";
 const ORDERS_API = `${BASE_API}/orders/get-user-order`;
 const UPDATE_CUSTOMER_API = `${BASE_API}/users/update-customer`;
 const PROFILE_STATS_API = `${BASE_API}/users/profile-stats`;

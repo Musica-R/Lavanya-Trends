@@ -34,7 +34,7 @@ const GALLERY = [
   },
 ];
 
-const API_URL = process.env.REACT_APP_API_URL || "https://sarees-backend-9wq0.onrender.com";
+const API_URL = process.env.REACT_APP_API_URL || "https://mediumorchid-rhinoceros-818505.hostingersite.com";
 
 // The UI shows friendly issue labels, but the API expects one of a
 // fixed set of requestType values — map one to the other here.

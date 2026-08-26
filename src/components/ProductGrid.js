@@ -12,7 +12,7 @@ const PRICE_PRESETS = [
   { label: "Above ₹5999", min: 5999, max: Infinity },
 ];
 
-const API_URL = process.env.REACT_APP_API_URL || "https://sarees-backend-9wq0.onrender.com";
+const API_URL = process.env.REACT_APP_API_URL || "https://mediumorchid-rhinoceros-818505.hostingersite.com";
 
 const SORT_OPTIONS = [
   { value: "popularity", label: "Popularity" },

@@ -5,7 +5,7 @@ import Cart from "../components/Cart";
 import MobileArrow from "../components/MobileArrow";
 import PaymentButton from "../components/PaymentButton";
 
-const ORDER_API = "https://sarees-backend-9wq0.onrender.com/orders/create-order";
+const ORDER_API = "https://mediumorchid-rhinoceros-818505.hostingersite.com/orders/create-order";
 const WHATSAPP_NUMBER = "918610766168";
 
 export default function Addtocart() {

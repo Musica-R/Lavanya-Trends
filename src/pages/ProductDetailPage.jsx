@@ -3,7 +3,7 @@ import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import "../styles/ProductDetail.css";
 
-const API_URL = process.env.REACT_APP_API_URL || "https://sarees-backend-9wq0.onrender.com";
+const API_URL = process.env.REACT_APP_API_URL || "https://mediumorchid-rhinoceros-818505.hostingersite.com";
 
 const isGold = (product) => product.category?.category?.toLowerCase() === "gold";
 
