@@ -39,18 +39,18 @@ const IMG = {
 };
 
 /* Static "Our Bestsellers" — 10 items */
-const products = [
-  { id: 1, name: "Navy Blue Crepe Saree", price: "₹4,949", image: IMG.saree1, isNew: true },
-  { id: 2, name: "Hot Pink Georgette Saree", price: "₹22,109", image: IMG.saree2, isNew: true },
-  { id: 3, name: "Silver Banarasi Tissue Saree", price: "₹16,829", image: IMG.saree3 },
-  { id: 4, name: "Burgundy Bandhani Silk Saree", price: "₹10,119", image: IMG.saree4 },
-  { id: 5, name: "Emerald Green Kanjivaram Saree", price: "₹18,499", image: IMG.saree5, isNew: true },
-  { id: 6, name: "Maroon Tussar Silk Saree", price: "₹8,299", image: IMG.saree6 },
-  { id: 7, name: "Ivory Organza Saree", price: "₹6,749", image: IMG.saree7 },
-  { id: 8, name: "Rose Gold Chiffon Saree", price: "₹9,199", image: IMG.saree8, isNew: true },
-  { id: 9, name: "Mustard Yellow Cotton Saree", price: "₹3,899", image: IMG.saree9 },
-  { id: 10, name: "Sapphire Blue Silk Saree", price: "₹14,599", image: IMG.saree10 },
-];
+// const products = [
+//   { id: 1, name: "Navy Blue Crepe Saree", price: "₹4,949", image: IMG.saree1, isNew: true },
+//   { id: 2, name: "Hot Pink Georgette Saree", price: "₹22,109", image: IMG.saree2, isNew: true },
+//   { id: 3, name: "Silver Banarasi Tissue Saree", price: "₹16,829", image: IMG.saree3 },
+//   { id: 4, name: "Burgundy Bandhani Silk Saree", price: "₹10,119", image: IMG.saree4 },
+//   { id: 5, name: "Emerald Green Kanjivaram Saree", price: "₹18,499", image: IMG.saree5, isNew: true },
+//   { id: 6, name: "Maroon Tussar Silk Saree", price: "₹8,299", image: IMG.saree6 },
+//   { id: 7, name: "Ivory Organza Saree", price: "₹6,749", image: IMG.saree7 },
+//   { id: 8, name: "Rose Gold Chiffon Saree", price: "₹9,199", image: IMG.saree8, isNew: true },
+//   { id: 9, name: "Mustard Yellow Cotton Saree", price: "₹3,899", image: IMG.saree9 },
+//   { id: 10, name: "Sapphire Blue Silk Saree", price: "₹14,599", image: IMG.saree10 },
+// ];
 
 /* Static "Shop By Occasion" — 10 items */
 const productss = [
@@ -122,23 +122,20 @@ const HomeProduct = () => {
   const [hotLoom, setHotLoom] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const [bestsellers, setBestsellers] = useState([]);
+  const [bestsellersLoading, setBestsellersLoading] = useState(true);
+
   useEffect(() => {
     const fetchHotLoom = async () => {
       try {
         const res = await fetch(`${API_URL}/products/get-looms`);
-
-        if (!res.ok) {
-          throw new Error("API response not OK");
-        }
-
+        if (!res.ok) throw new Error("API response not OK");
         const data = await res.json();
-
         const loomProducts = Array.isArray(data.products)
           ? data.products.filter(
-              (item) => item.loom === true && item.status === "active"
-            )
+            (item) => item.loom === true && item.status === "active"
+          )
           : [];
-
         setHotLoom(loomProducts);
       } catch (error) {
         console.error("Error fetching Hot of the Loom products:", error);
@@ -148,7 +145,27 @@ const HomeProduct = () => {
       }
     };
 
+    const fetchBestsellers = async () => {
+      try {
+        const res = await fetch(`${API_URL}/products/get-new-arrivals`);
+        if (!res.ok) throw new Error("API response not OK");
+        const data = await res.json();
+
+        const bestsellerProducts = Array.isArray(data.products)
+          ? data.products.filter((item) => item.status === "active")
+          : [];
+
+        setBestsellers(bestsellerProducts);
+      } catch (error) {
+        console.error("Error fetching Bestsellers:", error);
+        setBestsellers([]);
+      } finally {
+        setBestsellersLoading(false);
+      }
+    };
+
     fetchHotLoom();
+    fetchBestsellers();
   }, []);
 
   return (
@@ -275,6 +292,7 @@ const HomeProduct = () => {
       </div>
 
       {/* Our Bestsellers — 10 items */}
+      {/* Our Bestsellers — live API data */}
       <div className="wrap">
         <div className="section-heading">
           <span className="eyebrow">Customer Favorites</span>
@@ -287,31 +305,56 @@ const HomeProduct = () => {
         </div>
 
         <div className="homeproduct-grid grid-5">
-          {products.map((item) => (
-            <div key={item.id} className="homeproduct-card">
-              {item.isNew && <span className="badge-new">NEW</span>}
+          {bestsellersLoading ? (
+            <p className="state-msg">Loading products...</p>
+          ) : bestsellers.length > 0 ? (
+            bestsellers.map((product) => {
+              const imageUrl = product.image_url || "/ass/placeholder.jpg";
 
-              <div className="image-wrap">
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  width={350}
-                  height={500}
-                  className="product-image"
-                />
-                <div className="hover-overlay">
-                  <Link to="/product">
-                    <button className="view-product-btn">View Product</button>
-                  </Link>
+              const hasOffer =
+                product.offerPrice &&
+                Number(product.offerPrice) < Number(product.price);
+
+              return (
+                <div key={product.id} className="homeproduct-card">
+                  {product.isNewArrival && <span className="badge-new">NEW</span>}
+
+                  <div className="image-wrap">
+                    <img
+                      src={imageUrl}
+                      alt={product.name || "Saree"}
+                      width={350}
+                      height={500}
+                      className="product-image"
+                    />
+                    <div className="hover-overlay">
+                      <Link to={`/product`}>
+                        <button className="view-product-btn">View Product</button>
+                      </Link>
+                    </div>
+                  </div>
+
+                  <div className="product-infos">
+                    <h3>{product.name}</h3>
+                    {hasOffer ? (
+                      <p className="price">
+                        <span className="price-offer">
+                          {formatPrice(product.offerPrice)}
+                        </span>{" "}
+                        <span className="og-price">
+                          {formatPrice(product.price)}
+                        </span>
+                      </p>
+                    ) : (
+                      <p className="price">{formatPrice(product.price)}</p>
+                    )}
+                  </div>
                 </div>
-              </div>
-
-              <div className="product-infos">
-                <h3>{item.name}</h3>
-                <p className="price">{item.price}</p>
-              </div>
-            </div>
-          ))}
+              );
+            })
+          ) : (
+            <p className="state-msg">No Bestsellers available at the moment.</p>
+          )}
         </div>
       </div>
 

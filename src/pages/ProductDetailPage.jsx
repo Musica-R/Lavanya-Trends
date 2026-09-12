@@ -5,10 +5,18 @@ import "../styles/ProductDetail.css";
 
 const API_URL = process.env.REACT_APP_API_URL || "https://mediumorchid-rhinoceros-818505.hostingersite.com";
 
+const LOW_STOCK_THRESHOLD = 5;
+
 const isGold = (product) => product.category?.category?.toLowerCase() === "gold";
 
 const formatINR = (value) =>
   `₹${Number(value || 0).toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
+
+// Resolve the quantity for a given attribute/variant. Returns null when
+// the API hasn't provided stock info, so we never show a stock message
+// for products that don't track it.
+const getStockQty = (attribute) =>
+  typeof attribute?.quantity === "number" ? attribute.quantity : null;
 
 const ProductDetailPage = () => {
   const { id } = useParams();
@@ -16,8 +24,6 @@ const ProductDetailPage = () => {
   const navigate = useNavigate();
   const { addToCart } = useCart();
 
-  // If we navigated here from the grid (quick view / double click), the
-  // product is already passed in via router state — instant, no refetch.
   const [currentProduct, setCurrentProduct] = useState(location.state?.product || null);
   const [loading, setLoading] = useState(!location.state?.product);
   const [quantity, setQuantity] = useState(1);
@@ -26,8 +32,6 @@ const ProductDetailPage = () => {
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [relatedLoading, setRelatedLoading] = useState(false);
 
-  // Fallback: someone lands directly on /product/:id (refresh, shared
-  // link, back/forward without state) — fetch it by id instead.
   useEffect(() => {
     if (currentProduct && String(currentProduct.id) === String(id)) return;
 
@@ -103,13 +107,23 @@ const ProductDetailPage = () => {
   const activeAttribute = attributes[activeAttrIndex] || attributes[0];
   const mainImage = activeAttribute?.image_url;
 
+  // --- Stock state for the currently selected variant ---
+  const stockQty = getStockQty(activeAttribute);
+  const isOutOfStock = stockQty !== null && stockQty <= 0;
+  const isLowStock = stockQty !== null && stockQty > 0 && stockQty < LOW_STOCK_THRESHOLD;
+
+  // Keep the quantity selector from exceeding what's actually available.
+  useEffect(() => {
+    if (stockQty !== null && quantity > stockQty) {
+      setQuantity(Math.max(1, stockQty));
+    }
+  }, [stockQty]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleAddToCart = () => {
+    if (isOutOfStock) return;
     addToCart(currentProduct, quantity, activeAttribute);
   };
 
-  // Selecting a related saree now navigates to ITS page (updates the
-  // URL) instead of just swapping state in place, since this is a
-  // real page now, not a modal.
   const handleSelectRelated = (relatedProduct) => {
     navigate(`/product/${relatedProduct.id}`, { state: { product: relatedProduct } });
   };
@@ -133,9 +147,27 @@ const ProductDetailPage = () => {
     );
   }
 
-  const price = parseFloat(currentProduct.price) || 0;
-  const offerPrice = currentProduct.offerPrice ? parseFloat(currentProduct.offerPrice) : null;
+  // Price/offer/discount resolve from the active attribute first, falling
+  // back to the product-level values so switching variants updates instantly.
+  const rawPrice = activeAttribute?.price ?? currentProduct.price;
+  const rawOfferPrice = activeAttribute?.offerPrice ?? currentProduct.offerPrice;
+  const rawDiscount = activeAttribute?.discount ?? currentProduct.discount;
+
+  const price = parseFloat(rawPrice) || 0;
+  const offerPrice = rawOfferPrice !== null && rawOfferPrice !== undefined && rawOfferPrice !== ""
+    ? parseFloat(rawOfferPrice)
+    : null;
   const hasDiscount = offerPrice !== null && offerPrice < price;
+  const discountPercent = rawDiscount ? Number(rawDiscount) : null;
+
+  // Variant-specific spec fields
+  const specs = [
+    { label: "Fabric", value: activeAttribute?.fabric },
+    { label: "Work", value: activeAttribute?.work },
+    { label: "Blouse Length", value: activeAttribute?.blouseLength },
+    { label: "Occasion", value: activeAttribute?.occasion },
+    { label: "SKU", value: activeAttribute?.sku },
+  ].filter((spec) => spec.value !== null && spec.value !== undefined && spec.value !== "");
 
   return (
     <div className="product-detail-page">
@@ -146,7 +178,11 @@ const ProductDetailPage = () => {
 
         <div className="product-detail-body">
           <div>
-            <div className="product-detail-image-container">
+            <div
+              className={`product-detail-image-container ${
+                isOutOfStock ? "is-out-of-stock" : ""
+              }`}
+            >
               <img
                 src={mainImage}
                 alt={currentProduct.name}
@@ -154,6 +190,17 @@ const ProductDetailPage = () => {
                 width={500}
                 height={500}
               />
+
+              {isOutOfStock ? (
+                <span className="product-detail-image-badge oos">Out of Stock</span>
+              ) : (
+                hasDiscount &&
+                discountPercent && (
+                  <span className="product-detail-image-badge discount">
+                    {discountPercent}% off
+                  </span>
+                )
+              )}
             </div>
 
             {thumbnails.length > 0 && (
@@ -202,6 +249,7 @@ const ProductDetailPage = () => {
 
             <p className="product-detail-description">{currentProduct.desc}</p>
 
+            {/* Price block — reacts to activeAttribute changes */}
             <div className="product-detail-price-row">
               <span className="product-detail-price">
                 {formatINR(hasDiscount ? offerPrice : price)}
@@ -209,23 +257,70 @@ const ProductDetailPage = () => {
               {hasDiscount && (
                 <span className="product-detail-price-original">{formatINR(price)}</span>
               )}
+              {hasDiscount && discountPercent ? (
+                <span className="product-detail-discount-badge">{discountPercent}% OFF</span>
+              ) : null}
             </div>
+
+            {/* Variant-specific specs — fabric, work, blouse length, occasion, sku */}
+            {specs.length > 0 && (
+              <div className="product-detail-specs">
+                {specs.map((spec) => (
+                  <p key={spec.label} className="product-detail-spec-row">
+                    <span>{spec.label}</span>
+                    <strong>{spec.value}</strong>
+                  </p>
+                ))}
+              </div>
+            )}
+
+            {stockQty !== null && (
+              <p
+                className={`product-detail-stock ${
+                  isOutOfStock ? "out-of-stock" : isLowStock ? "low-stock" : ""
+                }`}
+              >
+                {isOutOfStock
+                  ? "Out of stock"
+                  : isLowStock
+                  ? `Only ${stockQty} left — order soon`
+                  : "In stock"}
+              </p>
+            )}
 
             <div className="product-detail-quantity">
               <label>Quantity:</label>
               <div className="quantity-selector">
-                <button className="qty-btn" onClick={() => setQuantity(Math.max(1, quantity - 1))}>
+                <button
+                  className="qty-btn"
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  disabled={isOutOfStock}
+                >
                   -
                 </button>
                 <span className="qty-value">{quantity}</span>
-                <button className="qty-btn" onClick={() => setQuantity(quantity + 1)}>
+                <button
+                  className="qty-btn"
+                  onClick={() =>
+                    setQuantity(
+                      stockQty !== null ? Math.min(stockQty, quantity + 1) : quantity + 1
+                    )
+                  }
+                  disabled={isOutOfStock || (stockQty !== null && quantity >= stockQty)}
+                >
                   +
                 </button>
               </div>
             </div>
 
-            <button className="product-detail-add-to-cart" onClick={handleAddToCart}>
-              Add to Cart - {formatINR((hasDiscount ? offerPrice : price) * quantity)}
+            <button
+              className="product-detail-add-to-cart"
+              onClick={handleAddToCart}
+              disabled={isOutOfStock}
+            >
+              {isOutOfStock
+                ? "Out of Stock"
+                : `Add to Cart = ${formatINR((hasDiscount ? offerPrice : price) * quantity)}`}
             </button>
           </div>
         </div>
@@ -238,9 +333,16 @@ const ProductDetailPage = () => {
             ) : (
               <div className="product-detail-related-grid">
                 {relatedProducts.map((rp) => {
-                  const rpPrice = parseFloat(rp.price) || 0;
-                  const rpOffer = rp.offerPrice ? parseFloat(rp.offerPrice) : null;
+                  const rpAttr = rp.attributes?.[0];
+                  const rpPrice = parseFloat(rpAttr?.price ?? rp.price) || 0;
+                  const rpOfferRaw = rpAttr?.offerPrice ?? rp.offerPrice;
+                  const rpOffer = rpOfferRaw !== null && rpOfferRaw !== undefined && rpOfferRaw !== ""
+                    ? parseFloat(rpOfferRaw)
+                    : null;
                   const rpHasDiscount = rpOffer !== null && rpOffer < rpPrice;
+                  const rpStockQty = getStockQty(rpAttr);
+                  const rpOutOfStock = rpStockQty !== null && rpStockQty <= 0;
+
                   return (
                     <button
                       key={rp.id}
@@ -248,11 +350,20 @@ const ProductDetailPage = () => {
                       className="product-detail-related-card"
                       onClick={() => handleSelectRelated(rp)}
                     >
-                      <img
-                        src={rp.attributes?.[0]?.image_url}
-                        alt={rp.name}
-                        className="product-detail-related-image"
-                      />
+                      <div
+                        className={`product-detail-related-image-wrap ${
+                          rpOutOfStock ? "is-out-of-stock" : ""
+                        }`}
+                      >
+                        <img
+                          src={rpAttr?.image_url}
+                          alt={rp.name}
+                          className="product-detail-related-image"
+                        />
+                        {rpOutOfStock && (
+                          <span className="product-detail-related-oos-tag">Out of stock</span>
+                        )}
+                      </div>
                       <span className="product-detail-related-name">{rp.name}</span>
                       <span className="product-detail-related-price">
                         {formatINR(rpHasDiscount ? rpOffer : rpPrice)}

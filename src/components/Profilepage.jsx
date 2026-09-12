@@ -19,6 +19,7 @@ import { MdOutlineLocalOffer } from "react-icons/md";
 import { MdOutlineLocalShipping } from "react-icons/md";
 import { MdOutlineSecurity } from "react-icons/md";
 import { MdOutlineSupportAgent } from "react-icons/md";
+import { MdOutlineReportProblem } from "react-icons/md";
 import { MdClose } from "react-icons/md";
 
 const BASE_API = "https://mediumorchid-rhinoceros-818505.hostingersite.com";
@@ -26,11 +27,12 @@ const ORDERS_API = `${BASE_API}/orders/get-user-order`;
 const UPDATE_CUSTOMER_API = `${BASE_API}/users/update-customer`;
 const PROFILE_STATS_API = `${BASE_API}/users/profile-stats`;
 const FAVORITES_API = `${BASE_API}/favourites/my-favorites`;
+const SERVICE_REQUESTS_API = `${BASE_API}/service-request/reqeust-by-id`;
 
 const ProfilePage = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
-  const [activeTab, setActiveTab] = useState("profile"); // "profile" | "bookings" | "wishlist"
+  const [activeTab, setActiveTab] = useState("profile"); // "profile" | "bookings" | "wishlist" | "issues"
   const [bookings, setBookings] = useState([]);
   const [loadingBookings, setLoadingBookings] = useState(false);
   const [bookingsError, setBookingsError] = useState("");
@@ -46,6 +48,12 @@ const ProfilePage = () => {
   const [favorites, setFavorites] = useState([]);
   const [loadingFavorites, setLoadingFavorites] = useState(false);
   const [favoritesError, setFavoritesError] = useState("");
+
+  // Issue Reports tab data, pulled from /service-request/reqeust-by-id/:userId.
+  // Each row is a support/complaint ticket, optionally tied to an order.
+  const [issueReports, setIssueReports] = useState([]);
+  const [loadingIssues, setLoadingIssues] = useState(false);
+  const [issuesError, setIssuesError] = useState("");
 
   // Edit profile state
   const [isEditing, setIsEditing] = useState(false);
@@ -168,6 +176,34 @@ const ProfilePage = () => {
     fetchFavorites();
   }, [activeTab, user]);
 
+  // Fetch issue reports (support/complaint tickets) once the Issue
+  // Reports tab is opened. Each row may optionally include a nested
+  // `order` object when the request is tied to a specific order.
+  useEffect(() => {
+    if (activeTab !== "issues" || !user) return;
+
+    const userId = getUserId(user);
+    if (!userId) {
+      setIssuesError("Could not identify your account. Please log in again.");
+      return;
+    }
+
+    const fetchIssues = async () => {
+      setLoadingIssues(true);
+      setIssuesError("");
+      try {
+        const res = await axios.get(`${SERVICE_REQUESTS_API}/${userId}`);
+        setIssueReports(Array.isArray(res.data?.data) ? res.data.data : []);
+      } catch (err) {
+        setIssuesError("Could not load your issue reports right now. Please try again later.");
+      } finally {
+        setLoadingIssues(false);
+      }
+    };
+
+    fetchIssues();
+  }, [activeTab, user]);
+
   const handleLogout = () => {
     localStorage.removeItem("user");
     navigate("/login", { replace: true });
@@ -257,6 +293,23 @@ const ProfilePage = () => {
     return path.startsWith("http") ? path : `${BASE_API}${path}`;
   };
 
+  // Some service-request rows come back with stray quotes/trailing
+  // commas baked into string fields (e.g. `"Vishnu Varatharaj",`).
+  // This only cleans up how it's displayed — it doesn't touch the data.
+  const cleanText = (value) => {
+    if (typeof value !== "string") return value;
+    return value.replace(/^"+|"+$/g, "").replace(/,+$/, "").trim();
+  };
+
+  // Turns "in_progress" into "In Progress" for status/priority display.
+  const formatStatus = (value) => {
+    if (!value) return "Pending";
+    return value
+      .split("_")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
+
   if (!user) return null; // brief flash before redirect effect runs
 
   // Prefer live stats from the API; fall back to fetched bookings
@@ -294,6 +347,12 @@ const ProfilePage = () => {
             onClick={() => setActiveTab("wishlist")}
           >
             <span className="lav-profile-nav-icon"><MdOutlineFavoriteBorder /></span> Wishlist
+          </button>
+          <button
+            className={`lav-profile-nav-item ${activeTab === "issues" ? "active" : ""}`}
+            onClick={() => setActiveTab("issues")}
+          >
+            <span className="lav-profile-nav-icon"><MdOutlineReportProblem /></span> Issue Reports
           </button>
           {/* <button className="lav-profile-nav-item" disabled>
             <span className="lav-profile-nav-icon"><MdOutlineLock /></span> Change Password
@@ -495,6 +554,73 @@ const ProfilePage = () => {
                       </li>
                     );
                   })}
+                </ul>
+              )}
+            </section>
+          )}
+
+          {activeTab === "issues" && (
+            <section className="lav-profile-card">
+              <div className="lav-profile-card-header">
+                <h2>Issue Reports</h2>
+              </div>
+
+              {loadingIssues && <p className="lav-profile-status">Loading your issue reports...</p>}
+              {issuesError && (
+                <p className="lav-profile-status lav-profile-error">{issuesError}</p>
+              )}
+
+              {!loadingIssues && !issuesError && issueReports.length === 0 && (
+                <p className="lav-profile-status">You haven't raised any issue reports yet.</p>
+              )}
+
+              {!loadingIssues && issueReports.length > 0 && (
+                <ul className="lav-profile-booking-list">
+                  {issueReports.map((report) => (
+                    <li key={report.id} className="lav-profile-booking-item">
+                      <div className="lav-profile-booking-header">
+                        <span>{cleanText(report.subject) || "Support Request"}</span>
+                        <span
+                          className={`lav-profile-issue-status lav-issue-${(report.status || "pending").toLowerCase()}`}
+                        >
+                          {formatStatus(report.status)}
+                        </span>
+                      </div>
+
+                      {report.message && (
+                        <p className="lav-profile-issue-message">{cleanText(report.message)}</p>
+                      )}
+
+                      {report.order && (
+                        <div className="lav-profile-issue-order">
+                          <span className="lav-profile-issue-order-label">
+                            Related order: {report.order.orderNumber || `#${report.order.id}`}
+                          </span>
+                          {(report.order.items || []).map((item, idx) => (
+                            <div key={idx} className="lav-profile-booking-line">
+                              <div className="lav-profile-booking-line-info">
+                                <span className="lav-profile-booking-line-name">
+                                  {item.productName}
+                                </span>
+                                <span className="lav-profile-booking-line-meta">
+                                  {[item.color, item.size].filter(Boolean).join(" · ")}
+                                  {item.quantity ? ` · Qty ${item.quantity}` : ""}
+                                </span>
+                              </div>
+                              <span className="lav-profile-booking-line-price">
+                                ₹{item.price || "-"}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      <div className="lav-profile-booking-details">
+                        <span>{formatDate(report.createdAt)}</span>
+                        <span>Priority: {formatStatus(report.priority)}</span>
+                      </div>
+                    </li>
+                  ))}
                 </ul>
               )}
             </section>

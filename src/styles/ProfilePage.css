@@ -648,6 +648,60 @@
   margin-top: 4px;
 }
 
+/* ---- Issue Reports tab ---- */
+.lav-profile-issue-status {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.lav-issue-pending {
+  background: #fdf0d5;
+  color: #b8860b;
+}
+
+.lav-issue-in_progress {
+  background: #e3edfb;
+  color: #2b5fad;
+}
+
+.lav-issue-resolved {
+  background: #dff2ea;
+  color: #1f7a4d;
+}
+
+.lav-issue-rejected,
+.lav-issue-closed {
+  background: #fbe3e3;
+  color: #b8362f;
+}
+
+.lav-profile-issue-message {
+  color: #555;
+  font-size: 13px;
+  margin: 4px 0 10px;
+  line-height: 1.5;
+}
+
+.lav-profile-issue-order {
+  border-top: 1px dashed #f0e2e6;
+  padding-top: 10px;
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lav-profile-issue-order-label {
+  font-size: 12px;
+  color: #8b1e3f;
+  font-weight: 600;
+}
+
 @media (max-width: 560px) {
   .lav-profile-form-grid {
     grid-template-columns: 1fr;

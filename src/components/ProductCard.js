@@ -13,12 +13,6 @@ const fillStyle = {
 
 const FALLBACK_IMAGE = "/placeholder-saree.jpg";
 
-// The API's first attribute entry may not have an image (some variants
-// have image_url: "" or null), so we walk the list and use the first
-// one that actually has a non-empty value, falling back to a
-// placeholder if none do. Checking this up front — rather than letting
-// the <img> try an empty src and fail — avoids a flash of the broken-
-// image icon before onError has a chance to swap it out.
 const getProductImage = (product) => {
     const attrs = product.attributes || [];
     const withImage = attrs.find((a) => a.image_url && a.image_url.trim() !== "");
