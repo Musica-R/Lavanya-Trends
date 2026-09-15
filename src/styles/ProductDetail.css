@@ -131,6 +131,13 @@
   flex-wrap: wrap;   /* add this */
 }
 
+.product-detail-shipping-note {
+  font-family: "Poppins", sans-serif;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  margin: -0.9rem 0 1.4rem;
+}
+
 .product-detail-thumbnail-btn {
   width: 64px;
   height: 78px;

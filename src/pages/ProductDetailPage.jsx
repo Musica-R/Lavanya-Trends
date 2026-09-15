@@ -81,8 +81,8 @@ const ProductDetailPage = () => {
 
         const pool = Array.isArray(data.products)
           ? data.products.filter(
-              (p) => p.status === "active" && !isGold(p) && p.id !== currentProduct.id
-            )
+            (p) => p.status === "active" && !isGold(p) && p.id !== currentProduct.id
+          )
           : [];
 
         const shuffled = [...pool].sort(() => Math.random() - 0.5);
@@ -180,9 +180,8 @@ const ProductDetailPage = () => {
         <div className="product-detail-body">
           <div>
             <div
-              className={`product-detail-image-container ${
-                isOutOfStock ? "is-out-of-stock" : ""
-              }`}
+              className={`product-detail-image-container ${isOutOfStock ? "is-out-of-stock" : ""
+                }`}
             >
               <img
                 src={mainImage}
@@ -210,9 +209,8 @@ const ProductDetailPage = () => {
                   <button
                     key={attr.id}
                     type="button"
-                    className={`product-detail-thumbnail-btn ${
-                      index === activeAttrIndex ? "active" : ""
-                    }`}
+                    className={`product-detail-thumbnail-btn ${index === activeAttrIndex ? "active" : ""
+                      }`}
                     onClick={() => setActiveAttrIndex(index)}
                     title={attr.color || `Option ${index + 1}`}
                   >
@@ -254,6 +252,7 @@ const ProductDetailPage = () => {
             <div className="product-detail-price-row">
               <span className="product-detail-price">
                 {formatINR(hasDiscount ? offerPrice : price)}
+                <span className="product-detail-shipping-note"> + shipping</span>
               </span>
               {hasDiscount && (
                 <span className="product-detail-price-original">{formatINR(price)}</span>
@@ -277,15 +276,14 @@ const ProductDetailPage = () => {
 
             {stockQty !== null && (
               <p
-                className={`product-detail-stock ${
-                  isOutOfStock ? "out-of-stock" : isLowStock ? "low-stock" : ""
-                }`}
+                className={`product-detail-stock ${isOutOfStock ? "out-of-stock" : isLowStock ? "low-stock" : ""
+                  }`}
               >
                 {isOutOfStock
                   ? "Out of stock"
                   : isLowStock
-                  ? `Only ${stockQty} left — order soon`
-                  : "In stock"}
+                    ? `Only ${stockQty} left — order soon`
+                    : "In stock"}
               </p>
             )}
 
@@ -352,9 +350,8 @@ const ProductDetailPage = () => {
                       onClick={() => handleSelectRelated(rp)}
                     >
                       <div
-                        className={`product-detail-related-image-wrap ${
-                          rpOutOfStock ? "is-out-of-stock" : ""
-                        }`}
+                        className={`product-detail-related-image-wrap ${rpOutOfStock ? "is-out-of-stock" : ""
+                          }`}
                       >
                         <img
                           src={rpAttr?.image_url}
