@@ -7,6 +7,7 @@ import { LuSend } from "react-icons/lu";
 import { FaPhoneAlt } from "react-icons/fa";
 import WhyShopHub from "./WhyShopHub";
 
+
 const API_URL = process.env.REACT_APP_API_URL || "https://mediumorchid-rhinoceros-818505.hostingersite.com";
 
 // The UI shows friendly issue labels, but the API expects one of a
@@ -268,6 +269,7 @@ export default function Contact() {
             />
           </div>
 
+
           {/* Info panel */}
           <div className="contact-info">
             <div className="contact-item">
@@ -276,7 +278,7 @@ export default function Contact() {
               </div>
               <div className="text">
                 <h4>Email Support</h4>
-                <span>support@yourstore.com</span>
+                <span>loganayagilavanya95@gmail.com</span>
               </div>
             </div>
 
@@ -286,7 +288,7 @@ export default function Contact() {
               </div>
               <div className="text">
                 <h4>WhatsApp</h4>
-                <span>+91 98765 43210</span>
+                <span>+91 63793 49734</span>
               </div>
             </div>
 
@@ -296,7 +298,7 @@ export default function Contact() {
               </div>
               <div className="text">
                 <h4>Customer Care</h4>
-                <span>Mon – Sat, 9 AM – 6 PM</span>
+                <span>Mon – Sat, 9:30 AM – 8:30 PM</span>
               </div>
             </div>
 
@@ -306,11 +308,17 @@ export default function Contact() {
               </div>
               <div className="text">
                 <h4>Warehouse</h4>
-                <span>Chennai, India</span>
+                <span>9/335 Sai Garden, Reddipatty,<br />
+                 Elampillai, Salem, Tamil Nadu</span>
               </div>
             </div>
           </div>
+
+
+
         </div>
+
+
 
         {/* RIGHT SIDE — FORM */}
         <div className="contact-right">

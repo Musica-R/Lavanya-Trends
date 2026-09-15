@@ -4,7 +4,7 @@ import { useCart } from "../context/CartContext";
 import "../styles/Header.css";
 import { HiMenu, HiX } from "react-icons/hi";
 import { FiShoppingBag } from "react-icons/fi";
-import wed from "../assets/hand-drawn-sari-illustration.png";
+import wed from "../assets/logo.jpg";
 
 const Header = () => {
   const { getCartCount, toggleCart } = useCart();
@@ -48,10 +48,10 @@ const Header = () => {
         <div className="sale-bar">
           <div className="sale-bar-track">
             <span className="sale-bar-text">
-              ✨ Festive Sale — Flat 30% OFF on all Sarees | Free Shipping over ₹2999 | Use code LAVANYA30 ✨
+              ✨ Festive Sale — Flat 30% OFF on all Sarees | Free Shipping | 📞 +91 63793 49734 | 📧 loganayagilavanya95@gmail.com ✨
             </span>
             <span className="sale-bar-text" aria-hidden="true">
-              ✨ Festive Sale — Flat 30% OFF on all Sarees | Free Shipping over ₹2999 | Use code LAVANYA30 ✨
+              ✨ Festive Sale — Flat 30% OFF on all Sarees | Free Shipping | 📞 +91 63793 49734 | 📧 loganayagilavanya95@gmail.com ✨
             </span>
           </div>
         </div>

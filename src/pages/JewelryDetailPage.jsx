@@ -107,7 +107,7 @@ const JewelryDetailPage = () => {
   }, [currentProduct]);
 
   const attributes = currentProduct?.attributes || [];
-  const thumbnails = useMemo(() => attributes.slice(0, 3), [attributes]);
+  const thumbnails = attributes; // show all variant thumbnails, no cap
 
   const activeAttribute = attributes[activeAttrIndex] || attributes[0];
   const mainImage = activeAttribute?.image_url;
@@ -131,6 +131,7 @@ const JewelryDetailPage = () => {
   if (!currentProduct) {
     return (
       <div className="jewelry-detail-page">
+         <br /><br /><br />
         <p className="jewelry-detail-loading">Product not found.</p>
         <button className="jewelry-detail-back-btn" onClick={() => navigate("/jew")}>
           ‹ Back to Jewelry

@@ -25,6 +25,8 @@ const SORT_OPTIONS = [
 const CATEGORY_VISIBLE_LIMIT = 6;
 const PAGE_SIZE = 12;
 
+const ALL_CATEGORY = { id: "All", name: "All" };
+
 // The API doesn't return a rating field yet, but ProductCard reads
 // product.rating to fill stars. This derives a stable per-product
 // rating (won't reshuffle on re-render) so the card shows real stars
@@ -59,18 +61,28 @@ const ProductGrid = ({ onViewDetails }) => {
   // won't load or save until the user is logged in.
   const [currentUserId] = useState(getCurrentUserId);
 
-  const [products, setProducts] = useState([]);
+  // ---- Full catalog, fetched once ----
+  // IMPORTANT: the backend's /products/get-sarees endpoint does NOT
+  // actually filter by categoryId/subcategoryId — it just paginates
+  // the whole table regardless of those query params (confirmed: a
+  // response filtered to one subcategoryId still contains rows with
+  // other subcategoryId values). So instead of asking the server to
+  // filter+paginate, we pull the entire catalog once and do
+  // filtering, sorting AND pagination ourselves below. This also
+  // means a filter can never "silently" hide matching products that
+  // happen to sit on a different server page.
+  const [allProducts, setAllProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   const [page, setPage] = useState(1);
-  // Server-reported pagination info (falls back gracefully if the API
-  // doesn't send these fields under these exact names).
-  const [totalCount, setTotalCount] = useState(0);
-  const [totalPagesFromApi, setTotalPagesFromApi] = useState(1);
 
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const [selectedSubcategory, setSelectedSubcategory] = useState("All");
+  // ---- Categories / subcategories ----
+  const [categories, setCategories] = useState([ALL_CATEGORY]);
+  const [subcategoriesAll, setSubcategoriesAll] = useState([]); // [{id, name, categoryId}]
+
+  const [selectedCategoryId, setSelectedCategoryId] = useState("All");
+  const [selectedSubcategoryId, setSelectedSubcategoryId] = useState("All");
   const [selectedColor, setSelectedColor] = useState("All");
   const [selectedFabrics, setSelectedFabrics] = useState([]);
 
@@ -92,67 +104,106 @@ const ProductGrid = ({ onViewDetails }) => {
   const [sortBy, setSortBy] = useState("popularity");
 
   // ---- Favorites (heart button) state ----
-  // Set of productIds the current user has favorited. Kept as a Set
-  // for O(1) lookups when rendering each ProductCard.
   const [favorites, setFavorites] = useState(() => new Set());
-  // Tracks in-flight requests per productId so rapid double-clicks
-  // don't fire duplicate add/remove calls for the same product.
   const [favoritePending, setFavoritePending] = useState(() => new Set());
 
   const pillsRef = useRef(null);
 
-  // Fetch one page of sarees at a time from the API using page + limit
-  // query params. Runs again whenever `page` changes.
+  // Fetch the full category list once on mount.
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch(`${API_URL}/category/get-categories`);
+        if (!res.ok) throw new Error("Failed to fetch categories");
+        const data = await res.json();
+        const list = Array.isArray(data.data) ? data.data : [];
+        setCategories([
+          ALL_CATEGORY,
+          ...list
+            .filter((c) => c.status === "active" && c.collection === "SAREE")
+            .map((c) => ({ id: c.id, name: c.name })),
+        ]);
+      } catch (err) {
+        console.error("Failed to fetch categories:", err);
+        setCategories([ALL_CATEGORY]);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  // Fetch the full subcategory list once on mount.
+  useEffect(() => {
+    const fetchSubcategories = async () => {
+      try {
+        const res = await fetch(`${API_URL}/category/get-subcategories`);
+        if (!res.ok) throw new Error("Failed to fetch subcategories");
+        const data = await res.json();
+        const list = Array.isArray(data.data) ? data.data : [];
+        setSubcategoriesAll(
+          list
+            .filter((s) => s.status === "active")
+            .map((s) => ({ id: s.id, name: s.name, categoryId: s.categoryId }))
+        );
+      } catch (err) {
+        console.error("Failed to fetch subcategories:", err);
+        setSubcategoriesAll([]);
+      }
+    };
+
+    fetchSubcategories();
+  }, []);
+
+  // Fetch the ENTIRE saree catalog once, by walking every server page
+  // with no categoryId/subcategoryId params (since the server ignores
+  // them anyway). Runs once on mount — no dependency on page/filters,
+  // because filtering/pagination now happen entirely below in
+  // filteredProducts + paginatedProducts.
+  useEffect(() => {
+    const fetchAllProducts = async () => {
       try {
         setLoading(true);
         setError("");
 
-        const res = await fetch(
-          `${API_URL}/products/get-sarees?page=${page}&limit=${PAGE_SIZE}`
+        const firstRes = await fetch(
+          `${API_URL}/products/get-sarees?page=1&limit=${PAGE_SIZE}`
         );
-        if (!res.ok) throw new Error("API response not OK");
+        if (!firstRes.ok) throw new Error("API response not OK");
+        const firstData = await firstRes.json();
 
-        const data = await res.json();
-        console.log(data);
+        let combined = Array.isArray(firstData.products) ? firstData.products : [];
+        const totalPagesFromApi = firstData.totalPages ?? 1;
 
-        const activeProducts = Array.isArray(data.products)
-          ? data.products.filter((item) => item.status === "active")
-          : [];
+        // Walk any remaining server pages so we end up with the full
+        // catalog in memory, regardless of how the server paginates it.
+        for (let p = 2; p <= totalPagesFromApi; p++) {
+          const res = await fetch(
+            `${API_URL}/products/get-sarees?page=${p}&limit=${PAGE_SIZE}`
+          );
+          if (!res.ok) continue;
+          const data = await res.json();
+          if (Array.isArray(data.products)) {
+            combined = combined.concat(data.products);
+          }
+        }
 
-        setProducts(activeProducts);
-
-        // Try to read pagination metadata from common response shapes.
-        const apiTotal =
-          data.total ?? data.totalCount ?? data.count ?? activeProducts.length;
-        const apiTotalPages =
-          data.totalPages ??
-          data.pages ??
-          Math.max(1, Math.ceil(apiTotal / PAGE_SIZE));
-
-        setTotalCount(apiTotal);
-        setTotalPagesFromApi(apiTotalPages);
+        const activeProducts = combined.filter((item) => item.status === "active");
+        setAllProducts(activeProducts);
       } catch (err) {
         console.error("Failed to fetch products:", err);
         setError("Unable to load products. Please try again later.");
-        setProducts([]);
-        setTotalCount(0);
-        setTotalPagesFromApi(1);
+        setAllProducts([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProducts();
-  }, [page]);
+    fetchAllProducts();
+  }, []);
 
-  // Fetch the user's already-favorited products once on mount (or
-  // whenever currentUserId becomes available), so a saree that was
-  // favorited in an earlier session still shows a red (filled) heart
-  // on load instead of starting empty every time.
+  // Fetch the user's already-favorited products once on mount.
   useEffect(() => {
-    if (!currentUserId) return; // not logged in — nothing to fetch
+    if (!currentUserId) return;
 
     const fetchFavorites = async () => {
       try {
@@ -169,55 +220,43 @@ const ProductGrid = ({ onViewDetails }) => {
         setFavorites(new Set(favoriteIds));
       } catch (err) {
         console.error("Failed to fetch favorites:", err);
-        // Leave favorites empty on failure rather than blocking the page.
       }
     };
 
     fetchFavorites();
   }, [currentUserId]);
 
-  // NOTE: the category object's field is `name` (not `category`) —
-  // { id, name, collection } — so every lookup below reads
-  // product.category?.name.
-  // NOTE: since `products` now only holds the current page's items,
-  // these facet lists only reflect what's on the current page.
-  const categories = useMemo(
-    () => ["All", ...new Set(products.map((p) => p.category?.name).filter(Boolean))],
-    [products]
-  );
-
-  // Subcategories only make sense once a category is picked, so this
-  // list (and the sidebar block for it) stays empty on "All".
   const subcategories = useMemo(() => {
-    if (selectedCategory === "All") return [];
-    const pool = products.filter((p) => p.category?.name === selectedCategory);
-    return [...new Set(pool.map((p) => p.subcategory?.name).filter(Boolean))];
-  }, [products, selectedCategory]);
+    if (selectedCategoryId === "All") return [];
+    return subcategoriesAll.filter((s) => s.categoryId === selectedCategoryId);
+  }, [subcategoriesAll, selectedCategoryId]);
 
-  // Colors only make sense once a subcategory is picked.
+  // Colors now derive from the full catalog, scoped to the selected
+  // subcategory — not just whatever happened to be on the current page.
   const colors = useMemo(() => {
-    if (selectedSubcategory === "All") return [];
-    const pool = products.filter(
-      (p) =>
-        p.category?.name === selectedCategory && p.subcategory?.name === selectedSubcategory
+    if (selectedSubcategoryId === "All") return [];
+    const inSubcategory = allProducts.filter(
+      (p) => p.subcategoryId === selectedSubcategoryId
     );
-    const all = pool.flatMap((p) => (p.attributes || []).map((a) => a.color).filter(Boolean));
+    const all = inSubcategory.flatMap((p) =>
+      (p.attributes || []).map((a) => a.color).filter(Boolean)
+    );
     return [...new Set(all)];
-  }, [products, selectedCategory, selectedSubcategory]);
+  }, [allProducts, selectedSubcategoryId]);
 
   const visibleSidebarCategories = showAllCategories
     ? categories
     : categories.slice(0, CATEGORY_VISIBLE_LIMIT);
 
-  const handleCategorySelect = (category) => {
-    setSelectedCategory(category);
-    setSelectedSubcategory("All");
+  const handleCategorySelect = (categoryId) => {
+    setSelectedCategoryId(categoryId);
+    setSelectedSubcategoryId("All");
     setSelectedColor("All");
     setPage(1);
   };
 
-  const handleSubcategorySelect = (subcategory) => {
-    setSelectedSubcategory((prev) => (prev === subcategory ? "All" : subcategory));
+  const handleSubcategorySelect = (subcategoryId) => {
+    setSelectedSubcategoryId((prev) => (prev === subcategoryId ? "All" : subcategoryId));
     setSelectedColor("All");
     setPage(1);
   };
@@ -242,8 +281,6 @@ const ProductGrid = ({ onViewDetails }) => {
     setMaxInput("");
     setPriceError("");
     if (activePreset?.label === preset.label) {
-      // Toggling the same preset off removes the price filter entirely
-      // — back to showing everything.
       setActivePreset(null);
       setPriceRange(null);
       return;
@@ -253,10 +290,6 @@ const ProductGrid = ({ onViewDetails }) => {
     setPage(1);
   };
 
-  // Custom price entry: Min must be filled in first, then Max must be
-  // at least ₹10 above Min (e.g. Min 100 → Max must be ≥ 110; the
-  // "100–500, then 500–1000" style ranges both work fine since
-  // 500 > 100+10 and 1000 > 500+10).
   const applyCustomPrice = () => {
     if (minInput === "") {
       setPriceError("Please enter a minimum price first.");
@@ -284,8 +317,8 @@ const ProductGrid = ({ onViewDetails }) => {
   };
 
   const clearAllFilters = () => {
-    setSelectedCategory("All");
-    setSelectedSubcategory("All");
+    setSelectedCategoryId("All");
+    setSelectedSubcategoryId("All");
     setSelectedColor("All");
     setSelectedFabrics([]);
     setPriceRange(null);
@@ -303,9 +336,6 @@ const ProductGrid = ({ onViewDetails }) => {
     pillsRef.current.scrollBy({ left: dir * 200, behavior: "smooth" });
   };
 
-  // ---- Favorite toggle: add-favorites (POST) / remove-favorites (GET) ----
-  // Optimistically flips the heart immediately, then calls the right
-  // endpoint. If the request fails, the heart reverts back.
   const toggleFavorite = async (product) => {
     if (!currentUserId) {
       console.warn("No logged-in user id found in localStorage; can't toggle favorite.");
@@ -313,13 +343,10 @@ const ProductGrid = ({ onViewDetails }) => {
     }
 
     const productId = product.id;
-
-    // Ignore clicks while a request for this product is already in flight.
     if (favoritePending.has(productId)) return;
 
     const wasFavorite = favorites.has(productId);
 
-    // Optimistic UI update — fill/unfill the heart right away.
     setFavorites((prev) => {
       const next = new Set(prev);
       if (wasFavorite) next.delete(productId);
@@ -331,14 +358,12 @@ const ProductGrid = ({ onViewDetails }) => {
 
     try {
       if (wasFavorite) {
-        // Was already a favorite -> remove it.
         const res = await fetch(
           `${API_URL}/favourites/remove-favorites?userId=${currentUserId}&productId=${productId}&productType=saree`,
           { method: "GET" }
         );
         if (!res.ok) throw new Error("Failed to remove favorite");
       } else {
-        // Not a favorite yet -> add it.
         const res = await fetch(`${API_URL}/favourites/add-favorites`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -352,7 +377,6 @@ const ProductGrid = ({ onViewDetails }) => {
       }
     } catch (err) {
       console.error("Favorite toggle failed:", err);
-      // Revert the optimistic update since the API call failed.
       setFavorites((prev) => {
         const next = new Set(prev);
         if (wasFavorite) next.add(productId);
@@ -368,22 +392,22 @@ const ProductGrid = ({ onViewDetails }) => {
     }
   };
 
-  // Filtering/sorting now only operates on the current page's fetched
-  // products (server-side pagination handles the "which 12 products"
-  // part; this just refines what's shown from that batch).
+  // Filtering + sorting now run over the FULL catalog (allProducts),
+  // not just whatever page the server happened to send. This is what
+  // actually fixes the "Kanchi Cotton is on page 3 but I filtered on
+  // page 1" bug — there's no server page to miss anymore.
   const filteredProducts = useMemo(() => {
-    let list = products.filter((product) => {
+    let list = allProducts.filter((product) => {
       const name = product.name?.toLowerCase() || "";
       const desc = product.desc?.toLowerCase() || "";
-      const category = product.category?.name?.toLowerCase() || "";
       const search = searchTerm?.toLowerCase() || "";
       const price = parseFloat(product.offerPrice || product.price) || 0;
 
       const matchCategory =
-        selectedCategory === "All" || product.category?.name === selectedCategory;
+        selectedCategoryId === "All" || product.categoryId === selectedCategoryId;
 
       const matchSubcategory =
-        selectedSubcategory === "All" || product.subcategory?.name === selectedSubcategory;
+        selectedSubcategoryId === "All" || product.subcategoryId === selectedSubcategoryId;
 
       const matchColor =
         selectedColor === "All" ||
@@ -396,9 +420,8 @@ const ProductGrid = ({ onViewDetails }) => {
         selectedFabrics.some((f) => name.includes(f.toLowerCase()) || desc.includes(f.toLowerCase()));
 
       const matchSearch =
-        !search || name.includes(search) || category.includes(search) || desc.includes(search);
+        !search || name.includes(search) || desc.includes(search);
 
-      // No price filter selected yet → every product passes.
       const matchPrice =
         !priceRange || (price >= priceRange.min && price <= priceRange.max);
 
@@ -437,9 +460,9 @@ const ProductGrid = ({ onViewDetails }) => {
 
     return list.map(withRating);
   }, [
-    products,
-    selectedCategory,
-    selectedSubcategory,
+    allProducts,
+    selectedCategoryId,
+    selectedSubcategoryId,
     selectedColor,
     selectedFabrics,
     searchTerm,
@@ -447,14 +470,20 @@ const ProductGrid = ({ onViewDetails }) => {
     sortBy,
   ]);
 
-  // Pagination is now driven by the API's reported total pages, not a
-  // local slice of a full product array.
-  const totalPages = Math.max(1, totalPagesFromApi);
+  // Pagination is now purely client-side, sliced from the filtered
+  // (not raw) list — so page count always matches what's actually
+  // being shown under the current filters.
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
 
-  const total = totalCount;
+  const total = filteredProducts.length;
   const rangeStart = total === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
   const rangeEnd = Math.min(currentPage * PAGE_SIZE, total);
+
+  const paginatedProducts = useMemo(
+    () => filteredProducts.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE),
+    [filteredProducts, currentPage]
+  );
 
   return (
     <section className="product-section" id="products">
@@ -519,8 +548,6 @@ const ProductGrid = ({ onViewDetails }) => {
                 ))}
               </div>
 
-              {/* Custom min/max entry. Min must be entered first; Max
-                  must be at least ₹10 above Min. */}
               <div className="price-custom-row">
                 <input
                   type="number"
@@ -552,13 +579,13 @@ const ProductGrid = ({ onViewDetails }) => {
               <p className="filter-block-title">Categories</p>
               <div className="category-checkbox-list">
                 {visibleSidebarCategories.map((category) => (
-                  <label key={category} className="category-checkbox">
+                  <label key={category.id} className="category-checkbox">
                     <input
                       type="checkbox"
-                      checked={selectedCategory === category}
-                      onChange={() => handleCategorySelect(category)}
+                      checked={selectedCategoryId === category.id}
+                      onChange={() => handleCategorySelect(category.id)}
                     />
-                    <span>{category === "All" ? "All Sarees" : category}</span>
+                    <span>{category.id === "All" ? "All Sarees" : category.name}</span>
                   </label>
                 ))}
               </div>
@@ -574,18 +601,18 @@ const ProductGrid = ({ onViewDetails }) => {
             </div>
 
             {/* Subcategory — only appears once a category is picked */}
-            {selectedCategory !== "All" && subcategories.length > 0 && (
+            {selectedCategoryId !== "All" && subcategories.length > 0 && (
               <div className="filter-block">
                 <p className="filter-block-title">Subcategory</p>
                 <div className="category-checkbox-list">
                   {subcategories.map((sub) => (
-                    <label key={sub} className="category-checkbox">
+                    <label key={sub.id} className="category-checkbox">
                       <input
                         type="checkbox"
-                        checked={selectedSubcategory === sub}
-                        onChange={() => handleSubcategorySelect(sub)}
+                        checked={selectedSubcategoryId === sub.id}
+                        onChange={() => handleSubcategorySelect(sub.id)}
                       />
-                      <span>{sub}</span>
+                      <span>{sub.name}</span>
                     </label>
                   ))}
                 </div>
@@ -593,7 +620,7 @@ const ProductGrid = ({ onViewDetails }) => {
             )}
 
             {/* Color — only appears once a subcategory is picked */}
-            {selectedSubcategory !== "All" && colors.length > 0 && (
+            {/* {selectedSubcategoryId !== "All" && colors.length > 0 && (
               <div className="filter-block">
                 <p className="filter-block-title">Color</p>
                 <div className="category-checkbox-list">
@@ -609,7 +636,7 @@ const ProductGrid = ({ onViewDetails }) => {
                   ))}
                 </div>
               </div>
-            )}
+            )} */}
           </aside>
 
           {/* ---------- Main Content ---------- */}
@@ -643,11 +670,11 @@ const ProductGrid = ({ onViewDetails }) => {
               <div className="category-filter" ref={pillsRef}>
                 {categories.map((category) => (
                   <button
-                    key={category}
-                    className={`category-btn ${selectedCategory === category ? "active" : ""}`}
-                    onClick={() => handleCategorySelect(category)}
+                    key={category.id}
+                    className={`category-btn ${selectedCategoryId === category.id ? "active" : ""}`}
+                    onClick={() => handleCategorySelect(category.id)}
                   >
-                    {category}
+                    {category.id === "All" ? "All" : category.name}
                   </button>
                 ))}
               </div>
@@ -670,8 +697,7 @@ const ProductGrid = ({ onViewDetails }) => {
             ) : (
               <>
                 <div className="product-grid show">
-                  {filteredProducts.map((product) => (
-                    // Double-click opens the full product modal.
+                  {paginatedProducts.map((product) => (
                     <div key={product.id} onDoubleClick={() => handleViewDetails(product)}>
                       <ProductCard
                         product={product}
@@ -683,7 +709,7 @@ const ProductGrid = ({ onViewDetails }) => {
                   ))}
                 </div>
 
-                {filteredProducts.length === 0 && (
+                {paginatedProducts.length === 0 && (
                   <div className="no-products">
                     <p>No products found.</p>
                   </div>

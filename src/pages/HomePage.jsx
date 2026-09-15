@@ -3,7 +3,7 @@ import Cart from "../components/Cart";
 import Contact from "../components/Contact";
 import HeroMain from "../components/HomeNain";
 import ProductCards from "../components/HomeProduct";
-import MobileArrow from "../components/MobileArrow";
+// import MobileArrow from "../components/MobileArrow";
 
 export default function HomePage() {
 
@@ -13,7 +13,7 @@ export default function HomePage() {
       <ProductCards/>
       <Contact />
       <Cart />
-      <MobileArrow />
+      {/* <MobileArrow /> */}
     </>
   );
 }

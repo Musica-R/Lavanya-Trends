@@ -128,6 +128,7 @@
   display: flex;
   gap: 14px;
   margin-top: 16px;
+  flex-wrap: wrap;   /* add this */
 }
 
 .product-detail-thumbnail-btn {

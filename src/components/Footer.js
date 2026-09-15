@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import "../styles/Footer.css";
-import { FaLinkedinIn, FaGithub, FaInstagram, FaTwitter } from "react-icons/fa";
+import { FaInstagram, FaPhoneAlt, FaWhatsapp } from "react-icons/fa";
 
 /* Same links as the navbar — keeps Quick Links in sync with site navigation */
 const navLinks = [
@@ -38,28 +38,55 @@ const Footer = () => {
         <div className="footer-column">
           <h4 className="footer-heading">Customer Service</h4>
           <ul className="footer-links">
-            <li><a href="#shipping">Shipping Info</a></li>
-            <li><a href="#returns">Returns</a></li>
-            <li><a href="#faq">FAQ</a></li>
-            <li><a href="#support">Support</a></li>
+            <li><Link to="/profile">Shipping Info</Link></li>
+            <li><Link to="/profile">Returns</Link></li>
+            <li><Link to="/contact">FAQ</Link></li>
+            <li><Link to="/contact">Support</Link></li>
           </ul>
         </div>
+
+
 
         <div className="footer-column">
           <h4 className="footer-heading">Follow Us</h4>
           <div className="social-links">
-            <a className="social" href="#" aria-label="LinkedIn"><FaLinkedinIn /></a>
-            <a className="social" href="#" aria-label="GitHub"><FaGithub /></a>
-            <a className="social" href="#" aria-label="Instagram"><FaInstagram /></a>
-            <a className="social" href="#" aria-label="Twitter"><FaTwitter /></a>
+            <a
+              className="social"
+              href="https://www.instagram.com/lavanyatrendsofficial?stkn=dThlNnZmODlvbTh3"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram"
+            >
+              <FaInstagram />
+            </a>
+
+            <a
+              className="social"
+              href="tel:+916379349734"
+              aria-label="Call us"
+            >
+              <FaPhoneAlt />
+            </a>
+
+            {/* Optional: WhatsApp instead of / in addition to call */}
+            <a
+              className="social"
+              href="https://wa.me/916379349734"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="WhatsApp"
+            >
+              <FaWhatsapp />
+            </a>
           </div>
-        </div>
-      </div>
+        </div >
+
+      </div >
 
       <div className="footer-bottom">
         <p>&copy; 2026 Lavanya Trends. All rights reserved.</p>
       </div>
-    </footer>
+    </footer >
   );
 };
 

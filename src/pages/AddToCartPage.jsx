@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useCart } from "../context/CartContext";
 import "../styles/Checkout.css";
 import Cart from "../components/Cart";
-import MobileArrow from "../components/MobileArrow";
+// import MobileArrow from "../components/MobileArrow";
 import PaymentButton from "../components/PaymentButton";
 
 const ORDER_API = "https://mediumorchid-rhinoceros-818505.hostingersite.com/orders/create-order";
@@ -273,7 +273,7 @@ export default function Addtocart() {
             </div>
 
             <Cart />
-            <MobileArrow />
+            {/* <MobileArrow /> */}
         </>
     );
 }

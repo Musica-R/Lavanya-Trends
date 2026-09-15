@@ -16,11 +16,14 @@ import JewelryDetailPage from "./pages/JewelryDetailPage";
 import ProfilePage from "./components/Profilepage";
 import LoginPage from "./components/Loginpage";
 import About from "./pages/About";
+import ScrollToTop from "./components/ScrollToTop";
+import FloatingButtons from "./components/FloatingButtons";
 
 export default function App() {
   return (
     <CartProvider>
       <SearchProvider>
+        <ScrollToTop />
         <Header />
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -36,6 +39,7 @@ export default function App() {
         </Routes>
         <Cart />
         <Footer />
+        <FloatingButtons />
       </SearchProvider>
     </CartProvider>
   );

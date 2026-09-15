@@ -19,6 +19,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -71,6 +72,8 @@
   display: flex;
   gap: 10px;
   margin-top: 12px;
+  flex-wrap: wrap;
+  /* add this */
 }
 
 .jewelry-detail-thumbnail-btn {
@@ -311,15 +314,19 @@
   .jewelry-detail-container {
     padding: 1.5rem;
   }
+
   .jewelry-detail-body {
     gap: 1.5rem;
   }
+
   .jewelry-detail-title {
     font-size: 1.75rem;
   }
+
   .jewelry-detail-price {
     font-size: 2.2rem;
   }
+
   .jewelry-detail-related-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }

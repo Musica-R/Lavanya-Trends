@@ -102,7 +102,7 @@ const ProductDetailPage = () => {
   }, [currentProduct]);
 
   const attributes = currentProduct?.attributes || [];
-  const thumbnails = useMemo(() => attributes.slice(0, 3), [attributes]);
+  const thumbnails = attributes; // show all variant thumbnails
 
   const activeAttribute = attributes[activeAttrIndex] || attributes[0];
   const mainImage = activeAttribute?.image_url;
@@ -171,6 +171,7 @@ const ProductDetailPage = () => {
 
   return (
     <div className="product-detail-page">
+      <br /><br /><br />
       <div className="product-detail-container">
         <button className="product-detail-back-btn" onClick={() => navigate(-1)}>
           ‹ Back

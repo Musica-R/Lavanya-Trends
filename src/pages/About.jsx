@@ -84,7 +84,7 @@ export default function About() {
 
           <div className="about-highlights">
             <div className="about-highlight">
-              <span className="about-highlight-num">12+</span>
+              <span className="about-highlight-num">3+</span>
               <span className="about-highlight-label">Years in the trade</span>
             </div>
             <div className="about-highlight">
@@ -166,20 +166,28 @@ export default function About() {
           <ul className="about-visit-details">
             <li>
               <span className="about-visit-label">Address</span>
-              <span>No. 14, Big Bazaar Street, Tāramangalam, Tamil Nadu, India</span>
+              <span>9/335 Sai Garden, Reddipatty Elampillai  Salem, Tamil Nadu</span>
             </li>
             <li>
               <span className="about-visit-label">Store Hours</span>
-              <span>Mon – Sat, 10:00 AM – 8:30 PM</span>
+              <span>Mon – Sat, 9:30 AM to 8:30 PM</span>
             </li>
             <li>
               <span className="about-visit-label">Phone</span>
-              <span>+91 98765 43210</span>
+              <span>6379349734</span>
+            </li>
+            <li>
+              <span className="about-visit-label">Email ID</span>
+              <span>loganayagilavanya95@gmail.com</span>
+            </li>
+            <li>
+              <span className="about-visit-label">Established</span>
+              <span>2022</span>
             </li>
           </ul>
 
           <a
-            href="https://www.google.com/maps/search/?api=1&query=Tāramangalam,Tamil+Nadu,India"
+            href="https://www.google.com/maps/search/?api=1&query=9%2F335%2C+Sai+Garden%2C+Reddipatty%2C+Elampillai%2C+Salem%2C+Tamil+Nadu"
             target="_blank"
             rel="noopener noreferrer"
             className="about-btn-secondary about-visit-btn"
@@ -191,7 +199,7 @@ export default function About() {
         <div className="about-visit-map">
           <iframe
             title="Shop location map"
-            src="https://maps.google.com/maps?q=Taramangalam,Tamil%20Nadu,India&z=13&output=embed"
+            src="https://maps.google.com/maps?q=9%2F335%2C%20Sai%20Garden%2C%20Reddipatty%2C%20Elampillai%2C%20Salem%2C%20Tamil%20Nadu&z=15&output=embed"
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
             allowFullScreen
