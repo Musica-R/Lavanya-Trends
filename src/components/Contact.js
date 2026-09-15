@@ -53,6 +53,10 @@ const NAME_LOOKUP_DEBOUNCE_MS = 600;
 // not on the very first keystroke.
 const MIN_NAME_LENGTH_FOR_LOOKUP = 2;
 
+// Backend requires the message to be at least this many characters —
+// validate client-side so the user gets instant feedback.
+const MIN_MESSAGE_LENGTH = 10;
+
 // Reads the logged-in user's id out of localStorage. Adjust the key
 // name below ("user") if your login flow writes to a different key.
 const getCurrentUserId = () => {
@@ -186,6 +190,11 @@ export default function Contact() {
       return;
     }
 
+    if (message.trim().length < MIN_MESSAGE_LENGTH) {
+      setSubmitError(`Message must be at least ${MIN_MESSAGE_LENGTH} characters long.`);
+      return;
+    }
+
     setSubmitting(true);
     setSubmitError("");
     setSubmitSuccess("");
@@ -214,13 +223,16 @@ export default function Contact() {
         }
       );
 
-      if (!res.ok) throw new Error("Request failed");
+      if (!res.ok) {
+        const errData = await res.json().catch(() => null);
+        throw new Error(errData?.message || "Request failed");
+      }
 
       setSubmitSuccess("Your support request has been submitted. We'll get back to you soon.");
       resetForm();
     } catch (err) {
       console.error("Failed to submit support request:", err);
-      setSubmitError("Could not submit your request right now. Please try again later.");
+      setSubmitError(err.message || "Could not submit your request right now. Please try again later.");
     } finally {
       setSubmitting(false);
     }
@@ -411,6 +423,7 @@ export default function Contact() {
               placeholder="How can we help you?"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
+              minLength={MIN_MESSAGE_LENGTH}
               required
             ></textarea>
 
