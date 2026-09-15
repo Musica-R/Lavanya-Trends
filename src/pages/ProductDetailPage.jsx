@@ -165,6 +165,8 @@ const ProductDetailPage = () => {
     { label: "Fabric", value: activeAttribute?.fabric },
     { label: "Work", value: activeAttribute?.work },
     { label: "Blouse Length", value: activeAttribute?.blouseLength },
+    { label: "Size", value: activeAttribute?.size },
+    { label: "Weight", value: activeAttribute?.weight },
     { label: "Occasion", value: activeAttribute?.occasion },
     { label: "SKU", value: activeAttribute?.sku },
   ].filter((spec) => spec.value !== null && spec.value !== undefined && spec.value !== "");
